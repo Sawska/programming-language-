@@ -1,7 +1,7 @@
 #ifndef TOKEN_H
 
 #define TOKEN_H 
-
+#include  <string>
 
 
 struct TOKEN
@@ -26,13 +26,14 @@ struct TOKEN
     INCREMENT_OPERATOR,
     COMPARE_OPERATOR,
     DECREMENT_OPERATOR,
+    UNKNOWN
 };
 
 
 enum TOKEN_CONCEPTS {
     NUMBER,
-    OPEN_CIRCLE,
-    CLOSE_CIRCLE,
+    OPEN_BRACKETS,
+    CLOSE_BRACKETS,
     ERROR_TOKEN,
 };
 
@@ -40,7 +41,7 @@ enum TOKEN_CONCEPTS {
 
     TOKEN_CONCEPTS concept;
     OPERATORS op;
-    std::string number;
+    double number;
 };
 
 

@@ -11,8 +11,9 @@
 
 class Lexer {
     std::vector<TOKEN> read_file();
-    bool check_if_number(std::string c);
+    bool check_if_number(char c);
     bool check_if_operator(std::string c);
+    void processOperator(char c, std::ifstream &fileContent, std::vector<TOKEN> &result);
 };
 
 
