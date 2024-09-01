@@ -2,7 +2,14 @@
 
 ASTNodePtr Parser::parse() {
 
-    return parseLogicalExpression();
+    ASTNodePtr root = parseLogicalExpression();
+
+
+    if (index < tokens.size()) {
+        throw std::runtime_error("Unexpected tokens after parsing");
+    }
+
+    return root;
 }
 
 ASTNodePtr Parser::parseLogicalExpression() {
@@ -37,6 +44,7 @@ ASTNodePtr Parser::parseExpression() {
             break;
         }
     }
+
     return left;
 }
 

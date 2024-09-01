@@ -1,25 +1,27 @@
-#ifndef Parser_H
-
-#define Parser_H
+#ifndef PARSER_H
+#define PARSER_H
 
 #include <iostream>
-#include <token.h>
 #include <vector>
-#include <AST.h>
+#include <memory>
+#include "token.h"
+#include "AST.h"
 
 class Parser {
-    std::vector<TOKEN> tokens;
-    int index;
-    Parser(const std::vector<TOKEN>& tokens) : tokens(tokens), index(0)  {}
-    
+public:
+    Parser(const std::vector<TOKEN>& tokens) 
+        : tokens(tokens), index(0) {}
+
     ASTNodePtr parse();
     ASTNodePtr parseExpression();
     ASTNodePtr parseTerm();
     ASTNodePtr parseFactor();
     ASTNodePtr parseLogicalExpression();
 
-    AST ast;
+private:
+    std::vector<TOKEN> tokens;
+    int index;
     
 };
 
-#endif //PARSER_H
+#endif // PARSER_H
