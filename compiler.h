@@ -1,17 +1,20 @@
 #ifndef COMPILER_H
 
 #define COMPILER_H
-#include <parser.h>
-#include<lexer.h>
+#include "parser.h"
+#include "lexer.h"
 
-#define ISRELP 0;
+#define ISREPL 0
 
 class Compiler {
-    Parser parser;
+    public:
+    Compiler(Lexer lex) : lexer(lex), parser(Parser(lexer.read_file())), root(parser.parse()) {}
+    void run();
+    private:
     Lexer lexer;
+    Parser parser;
     ASTNodePtr root;
     void REPL();
-    void run();
     double evaluateAST(const ASTNodePtr& node);
 };  
 

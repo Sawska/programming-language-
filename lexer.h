@@ -10,10 +10,12 @@
 #include "token.h"
 
 class Lexer {
+    public:
     std::vector<TOKEN> read_file();
-    bool check_if_number(char c);
-    bool check_if_operator(std::string c);
+    private:
     void processOperator(char c, std::ifstream &fileContent, std::vector<TOKEN> &result);
+    bool check_if_number(char c);
+    bool check_if_operator(char c);
 };
 
 
