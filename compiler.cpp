@@ -28,7 +28,6 @@ double Compiler::evaluateAST(const ASTNodePtr& node) {
         case AST::Type::BinaryOperation: {
             double leftValue = evaluateAST(node->left);
             double rightValue = evaluateAST(node->right);
-
             switch (node->op) {
                 case TOKEN::OPERATORS::PLUS_OPERATOR:
                     return leftValue + rightValue;
@@ -39,23 +38,36 @@ double Compiler::evaluateAST(const ASTNodePtr& node) {
                 case TOKEN::OPERATORS::DIVIDE_OPERATOR:
                     return leftValue / rightValue;
                 case TOKEN::OPERATORS::AND_OPERATOR:
-                    
-                    return static_cast<double>(leftValue != 0 && rightValue != 0);
+                    return static_cast<double>(static_cast<int>(leftValue) != 0 && static_cast<int>(rightValue) != 0);
                 case TOKEN::OPERATORS::OR_OPERATOR:
-                    return static_cast<double>(leftValue != 0 || rightValue != 0);
+                    return static_cast<double>(static_cast<int>(leftValue) != 0 || static_cast<int>(rightValue) != 0);
                 case TOKEN::OPERATORS::GREATER_THAN_OPERATOR:
                     return static_cast<double>(leftValue > rightValue);
                 case TOKEN::OPERATORS::LESS_THAN_OPERATOR:
                     return static_cast<double>(leftValue < rightValue);
-                case TOKEN::OPERATORS::EQUALS_OPERATOR:
+                case TOKEN::OPERATORS::COMPARE_OPERATOR:
                     return static_cast<double>(leftValue == rightValue);
                 case TOKEN::OPERATORS::NOT_EQUALS_OPERATOR:
                     return static_cast<double>(leftValue != rightValue);
                 case TOKEN::OPERATORS::LESS_THAN_EQUAL_OPERATOR:
                     return static_cast<double>(leftValue <= rightValue);
                 case TOKEN::OPERATORS::GREATER_THAN_EQUAL_OPERATOR:
-                std::cout << "here" << std::endl;
                     return static_cast<double>(leftValue >= rightValue);
+                case TOKEN::OPERATORS::RIGHT_SHIFT_OPERATOR:
+                    return static_cast<double>(static_cast<int>(leftValue) >> static_cast<int>(rightValue));
+                case TOKEN::OPERATORS::LEFT_SHIFT_OPERATOR:
+                    return static_cast<double>(static_cast<int>(leftValue) << static_cast<int>(rightValue));
+                case TOKEN::OPERATORS::RIGHT_SHIFT_EQUAL_OPERATOR:
+                    return static_cast<double>(static_cast<int>(leftValue) >> static_cast<int>(rightValue));
+                case TOKEN::OPERATORS::LEFT_SHIFT_EQUAL_OPERATOR:
+                    return static_cast<double>(static_cast<int>(leftValue) << static_cast<int>(rightValue));
+                case TOKEN::OPERATORS::BIT_AND_OPERATOR:
+                    return static_cast<double>(static_cast<int>(leftValue) & static_cast<int>(rightValue));
+                case TOKEN::OPERATORS::BIT_OR_OPERATOR:
+                    return static_cast<double>(static_cast<int>(leftValue) | static_cast<int>(rightValue));
+
+
+                    
                 default:
                     throw std::runtime_error("Unsupported binary operator");
             }
@@ -67,11 +79,11 @@ double Compiler::evaluateAST(const ASTNodePtr& node) {
                 case TOKEN::OPERATORS::NOT_OPERATOR:
                     return static_cast<double>(operandValue == 0);
                 case TOKEN::OPERATORS::BIT_NOT_OPERATOR:
-                        return ~static_cast<int>(operandValue);
+                    return ~static_cast<int>(operandValue);
                 case TOKEN::OPERATORS::INCREMENT_OPERATOR:
-                        return operandValue++;
-                case TOKEN::OPERATORS::DECREMENT_OPERATOR: 
-                        return operandValue--;
+                    return ++operandValue;
+                case TOKEN::OPERATORS::DECREMENT_OPERATOR:
+                    return --operandValue;
                 default:
                     throw std::runtime_error("Unsupported unary operator");
             }
