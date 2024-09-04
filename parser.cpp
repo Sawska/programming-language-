@@ -25,7 +25,7 @@ ASTNodePtr Parser::parseLogicalExpression() {
             token.op == TOKEN::OPERATORS::RIGHT_SHIFT_EQUAL_OPERATOR ||
             token.op == TOKEN::OPERATORS::NOT_EQUALS_OPERATOR ||
             token.op == TOKEN::OPERATORS::BIT_AND_OPERATOR ||
-            token.op == TOKEN::OPERATORS::BIT_OR_OPERATOR) {
+        token.op == TOKEN::OPERATORS::BIT_OR_OPERATOR) {
             index++;
             auto right = parseExpression();
             left = AST::makeBinaryOperationNode(token.op, std::move(left), std::move(right));
@@ -36,6 +36,36 @@ ASTNodePtr Parser::parseLogicalExpression() {
 
     return left;
 }
+
+ASTNodePtr Parser::parseVariableOrAssignment() {
+    const TOKEN& token = tokens[index];
+    std::string varName = token.variableName;
+    index++;
+
+    if (index < tokens.size() && tokens[index].op == TOKEN::OPERATORS::EQUALS_OPERATOR) {
+
+        index++;
+        auto expr = parseExpression();
+
+
+        if (index < tokens.size() && tokens[index].op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
+            index++;
+        }
+
+        return std::make_unique<VariableNode>(varName, std::move(expr));
+    }
+
+
+    TOKEN variableValue = table.getVariableValue(varName);
+
+    if (variableValue.op == TOKEN::OPERATORS::UNKNOWN) {
+        throw std::runtime_error("Undefined variable: " + varName);
+    }
+
+
+    return std::make_unique<VariableNode>(varName, AST::makeNumberNode(variableValue.number));
+}
+
 
 
 ASTNodePtr Parser::parseExpression() {
@@ -56,7 +86,10 @@ ASTNodePtr Parser::parseExpression() {
             index++;
             auto right = parseTerm();
             left = AST::makeBinaryOperationNode(token.op, std::move(left), std::move(right));
-        } else {
+        } else if(token.op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
+            index++;
+        }
+        else {
             break;
         }
     }
@@ -113,7 +146,13 @@ ASTNodePtr Parser::parseFactor() {
         index++;
         auto operand = parseFactor();
         return AST::makeUnaryOperationNode(token.op, std::move(operand));
-    } else {
+    }  else if(token.concept == TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME) {
+        return parseVariableOrAssignment();
+    } else if(token.op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
+        index++;
+        return nullptr;
+    }
+    else {
         std::cerr << "Unexpected token: " << token.op << " at index: " << index << std::endl;
         throw std::runtime_error("Unexpected token: " + std::to_string(token.op));
     }

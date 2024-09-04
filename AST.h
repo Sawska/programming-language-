@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include "token.h"
+#include "SymbolTable.h"
 
 class AST;
 
@@ -44,11 +45,17 @@ public:
 
     VariableNode(std::string name, ASTNodePtr value)
         : AST(Type::Variable), name(std::move(name)), value(std::move(value)) {}
+
+    TOKEN evaluate(const SymbolTable& symbolTable) const {
+        return symbolTable.getVariableValue(name);
+    }
 };
 
 class ExpressionNode : public AST {
 public:
     ExpressionNode(Type type) : AST(type) {}
 };
+
+
 
 #endif // AST_H

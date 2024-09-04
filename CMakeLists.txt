@@ -11,6 +11,8 @@ add_executable(PROGRAMMING_LANGUAGE
     token.h
     compiler.cpp
     main.cpp
+    SymbolTable.cpp   
+    
 )
 
 

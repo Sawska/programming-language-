@@ -17,7 +17,8 @@ public:
     ASTNodePtr parseTerm();
     ASTNodePtr parseFactor();
     ASTNodePtr parseLogicalExpression();
-
+    ASTNodePtr parseVariableOrAssignment();
+    SymbolTable table;
 private:
     std::vector<TOKEN> tokens;
     int index;

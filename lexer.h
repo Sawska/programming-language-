@@ -10,6 +10,7 @@
 #include <unordered_set>
 #include <map>
 #include "variable.h"
+#include "SymbolTable.h"
 
 class Lexer {
     public:
@@ -29,7 +30,7 @@ class Lexer {
     void handleIfStatment(std::ifstream &fileContent, std::vector<TOKEN> &result);
     void handleElseStatment(std::ifstream &fileContent, std::vector<TOKEN> &result);
     std::unordered_set <std::string> private_words { "function" "let" "for" "while" "if" "else" "else if" "for", "class"};
-    std::unordered_set <std::string> vars;
+    SymbolTable table;
 };
 
 enum class LexerState {
@@ -38,11 +39,12 @@ enum class LexerState {
     While,
     IfStatment,
     elseStatment,
-    elseifStatment,
     VariableName,
+    LetKeywoard,
     functionState,
     classState,
     forLoop,
+    Assignment,
     Error,
 };
 

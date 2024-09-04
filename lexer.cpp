@@ -36,7 +36,7 @@ std::vector<TOKEN> Lexer::read_file() {
         }
         else if (check_if_operator(c)) {
             processOperator(c, fileContent, result);
-        } else if(check_if_char(c))
+        } else if(check_if_char(c) || c == '\'' || c == '"')
         {
 
             processChar(c, fileContent, result);
@@ -240,15 +240,17 @@ bool Lexer::check_if_char(char c) {
     return isalpha(c);
 }
 
-void Lexer::processChar(char c,std::ifstream &fileContent, std::vector<TOKEN> &result) {
+void Lexer::processChar(char c, std::ifstream &fileContent, std::vector<TOKEN> &result) {
+    std::cout << "starting processing chars" << std::endl;
     switch (c) {
         case '\'':
         case '"':
-            processString(c,fileContent,result);
-            break;
+            processString(c, fileContent, result);
+            return;
         default:
             break;
     }
+    
     TOKEN tok;
     LexerState state = LexerState::Start;
 
@@ -258,228 +260,267 @@ void Lexer::processChar(char c,std::ifstream &fileContent, std::vector<TOKEN> &r
         result.push_back(tok);
     };
 
-    auto get_next_char = [&fileContent]() -> char {
-        char c;
-        fileContent.get(c);
-        return c;
-    };
-       std::string buffer;
+    
 
-    while(fileContent.good()) {
-    switch(state) {
-        case LexerState::Start:
-            if (c == 'l') {
-                state = LexerState::Variable;
-            } else if (c == 'w') {
-                state = LexerState::While;
-            }  else if (c == 'f')
-            {
-                state = LexerState::forLoop;
-            } else if(c == 'i')
-            {
-                state = LexerState::IfStatment;
-            } else if (c == 'e')
-            {
-                state = LexerState::elseStatment;
-            }  else if(c == 'f')
-            {
-                state = LexerState::functionState;
-            } else if(c == 'c') {
-                state = LexerState::classState;
-            }
-            else if(std::isalpha(c) || c == '_') {
-                buffer.push_back(c);
-                state = LexerState::VariableName;
+    std::string buffer;
 
-            }
-            else {
-                state = LexerState::Error;
-            }
-            break;
-        case LexerState::classState:
-        if(c == 'l')
-        {
-            c = get_next_char();
-            if(c == 'a')
-            {
-                c = get_next_char();
-                if(c == 's')
-                {
-                    c = get_next_char();
-                    if(c == 's')
-                    {
-                     // push class    
-                    } else {
-                        state = LexerState::Error;              
-                    }
-                } else {
-                    state = LexerState::Error;          
-                }
-            } else {
-                state = LexerState::Error;      
-            }
-        } else {
-            state = LexerState::Error;  
-        }
-
-        case LexerState::functionState:
-        if(c == 'u')
-        {
-            c = get_next_char();
-            if(c == 'n')
-            {
-                c = get_next_char();
-                if(c == 'c')
-                {
-                    c = get_next_char();
-                    if(c == 't')
-                    {
-                        c = get_next_char();
-                        if(c == 'i')
-                        {
-                            c = get_next_char();
-                            if(c == 'o')
-                            {
-                                c = get_next_char();
-                                if(c == 'n')
-                                {
-                                    // push function
-                                }
-                            } else {
-                                state = LexerState::Error;                    
-                            }
-                        } else {
-                            state = LexerState::Error;                
-                        }
-                    } else {
-                        state = LexerState::Error;            
-                    }
-                } else {
-                    state = LexerState::Error;        
-                }
-            } else {
-                state = LexerState::Error;    
-            }
-        } else {
-            state = LexerState::Error;
-        }
-        break;
-        
-        case LexerState::VariableName:
-            if(std::isalnum(c) || c == '_') {
-                buffer.push_back(c);
-            } else {
-                if(vars.find(buffer) != vars.end()) {
-                    TOKEN varToken;
-                    varToken.concept == TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME;
-                    varToken.variableName = buffer;
-                    result.push_back(varToken);
-                } else {
-                     throw std::runtime_error("Undefined variable: " + buffer);
-                }
-                buffer.clear();
-                state = LexerState::Start;
-
-                if(!fileContent.eof()) {
-                    fileContent.unget();
-                    c = get_next_char();
+    while (fileContent.good()) {
+        std::cout << c << std::endl;
+        switch (state) {
+            case LexerState::Start:
+                if (c == 'l') {
+                    state = LexerState::LetKeywoard;
+                    fileContent.get(c);
                     continue;
+                } else if (c == 'w') {
+                    state = LexerState::While;
+                    fileContent.get(c);;
+                    continue;
+                } else if (c == 'f') {
+                    state = LexerState::forLoop;
+                    fileContent.get(c);;
+                    continue;
+                } else if (c == 'i') {
+                    state = LexerState::IfStatment;
+                    fileContent.get(c);;
+                    continue;
+                } else if (c == 'e') {
+                    state = LexerState::elseStatment;
+                    fileContent.get(c);;
+                    continue;
+                } else if (c == 'f') {
+                    state = LexerState::functionState;
+                    fileContent.get(c);;
+                    continue;
+                } else if (c == 'c') {
+                    state = LexerState::classState;
+                    fileContent.get(c);;
+                    continue;
+                } else if (std::isalpha(c) || c == '_') {
+                    buffer.push_back(c);
+                    state = LexerState::VariableName;
+                    fileContent.get(c);;
+                    continue;
+                } else {
+                    state = LexerState::Error;
                 }
-            }
-            break;
-        case LexerState::elseStatment:
-            if (c == 'l')
-            {
-                c = get_next_char();
-                if( c == 's') {
-                    c = get_next_char();
-                    if(c == 'e')
-                    {
-                        // push else back
+                break;
+                
+            case LexerState::LetKeywoard:
+            
+            
+                if (c == 'e') {
+                    fileContent.get(c);
+                            
+                    if (c == 't') {
+                        std::cout << c << std::endl;
+                        state = LexerState::Start;
+                        push_operator_token(TOKEN::TOKEN_CONCEPTS::VARIABLE);
+                        processVariable(c,fileContent,result);
+                        return;
                     } else {
-                    state = LexerState::Error;        
+                        state = LexerState::Error;
                     }
                 } else {
                     state = LexerState::Error;
                 }
-            } else {
-                state = LexerState::Error;
-            }
-        break;
-        case LexerState::IfStatment:
-            c = get_next_char();
-            if( c ==  'f')
-            {
-                c = get_next_char();
-                if(c == 'e')
-                {   
-                    c = get_next_char();
-                    if(c == 'l')
-                    {
-                    c = get_next_char();
-                    if(c == 's')
-                    {
-                        c = get_next_char();
-                        if(c == 'e')
-                        {
-                            // push if else
+                break;
+
+            case LexerState::classState:
+                if (c == 'l') {
+                    fileContent.get(c);
+                    if (c == 'a') {
+                        fileContent.get(c);
+                        if (c == 's') {
+                            fileContent.get(c);
+                            if (c == 's') {
+                                // push class
+                            } else {
+                                state = LexerState::Error;
+                            }
                         } else {
                             state = LexerState::Error;
                         }
                     } else {
                         state = LexerState::Error;
-                    } 
+                    }
+                } else {
+                    state = LexerState::Error;
+                }
+                break;
+
+            case LexerState::functionState:
+                if (c == 'u') {
+                    fileContent.get(c);
+                    if (c == 'n') {
+                        fileContent.get(c);
+                        if (c == 'c') {
+                            fileContent.get(c);
+                            if (c == 't') {
+                                fileContent.get(c);
+                                if (c == 'i') {
+                                    fileContent.get(c);
+                                    if (c == 'o') {
+                                        fileContent.get(c);
+                                        if (c == 'n') {
+                                            // push function
+                                        } else {
+                                            state = LexerState::Error;
+                                        }
+                                    } else {
+                                        state = LexerState::Error;
+                                    }
+                                } else {
+                                    state = LexerState::Error;
+                                }
+                            } else {
+                                state = LexerState::Error;
+                            }
+                        } else {
+                            state = LexerState::Error;
+                        }
                     } else {
                         state = LexerState::Error;
                     }
                 } else {
-                    // push if statment
+                    state = LexerState::Error;
                 }
-            } else {
-                state = LexerState::Error;
-            }
-            break;
-        case LexerState::forLoop:
-            c = get_next_char();
-            if (c == 'o') {
-                c = get_next_char();
-                if(c == 'r')
-                {
+                break;
 
-                } else {
-                    state = LexerState::Error;
+            case LexerState::VariableName:
+                if (std::isalnum(c) || c == '_') {
+                    buffer.push_back(c);
+                } else  if(isspace(c))
+                {
+                    while(isspace(c))
+                    {
+                        fileContent.get(c);;
+                    }
                 }
-            } else {
-                state = LexerState::Error;
-            }
-            break;
-        
-        case LexerState::Variable:
-            c = get_next_char();
-            if (c == 'e') {
-                c = get_next_char();
-                if (c == 't') {
-                    push_operator_token(TOKEN::TOKEN_CONCEPTS::VARIABLE);
+                else if (c == '=') {
+                    std::cout << "in variable case" << std::endl;
+                    TOKEN varToken;
+                    varToken.concept = TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME;
+                    varToken.variableName = buffer;
+                    result.push_back(varToken);
+                    TOKEN assignToken;
+                    assignToken.op = TOKEN::OPERATORS::EQUALS_OPERATOR;
+                    result.push_back(assignToken);
+                    buffer.clear();
+                    state = LexerState::Assignment;
+                } else {
+                    
+                    if (table.getVariableValue(buffer).op == TOKEN::OPERATORS::UNKNOWN) {
+                        TOKEN varToken;
+                        varToken.concept = TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME;
+                        varToken.variableName = buffer;
+                        result.push_back(varToken);
+                    } else {
+                        throw std::runtime_error("Undefined variable: " + buffer);
+                    }
+                    buffer.clear();
                     state = LexerState::Start;
+                    if (!fileContent.eof()) {
+                        fileContent.unget();
+                        fileContent.get(c);
+                        continue;
+                    }
+                }
+                break;
+
+            case LexerState::Assignment:
+                processAssignment(fileContent, result);
+                return;
+                break;
+
+            case LexerState::elseStatment:
+                if (c == 'l') {
+                    fileContent.get(c);
+                    if (c == 's') {
+                        fileContent.get(c);
+                        if (c == 'e') {
+                            // push else
+                        } else {
+                            state = LexerState::Error;
+                        }
+                    } else {
+                        state = LexerState::Error;
+                    }
                 } else {
                     state = LexerState::Error;
                 }
-            } else {
-                state = LexerState::Error;
-            }
-            break;
-             case LexerState::While:
-                c = get_next_char();
-                if (c == 'w') {
-                    c = get_next_char();
-                    if (c == 'h') {
-                        c = get_next_char();
-                        if (c == 'i') {
-                            c = get_next_char();
-                            if (c == 'l') {
-                                c = get_next_char();
+                break;
+
+            case LexerState::IfStatment:
+                fileContent.get(c);
+                if (c == 'f') {
+                    fileContent.get(c);
+                    if (c == 'e') {
+                        fileContent.get(c);
+                        if (c == 'l') {
+                            fileContent.get(c);
+                            if (c == 's') {
+                                fileContent.get(c);
                                 if (c == 'e') {
-                                    
+                                    // push if else
+                                } else {
+                                    state = LexerState::Error;
+                                }
+                            } else {
+                                state = LexerState::Error;
+                            }
+                        } else {
+                            state = LexerState::Error;
+                        }
+                    } else {
+                        // push if statement
+                    }
+                } else {
+                    state = LexerState::Error;
+                }
+                break;
+
+            case LexerState::forLoop:
+                fileContent.get(c);
+                if (c == 'o') {
+                    fileContent.get(c);
+                    if (c == 'r') {
+                        // push for loop
+                    } else {
+                        state = LexerState::Error;
+                    }
+                } else {
+                    state = LexerState::Error;
+                }
+                break;
+
+            case LexerState::Variable:
+                fileContent.get(c);
+                if (c == 'e') {
+                    fileContent.get(c);
+                    if (c == 't') {
+                        push_operator_token(TOKEN::TOKEN_CONCEPTS::VARIABLE);
+                        state = LexerState::Start;
+                    } else {
+                        state = LexerState::Error;
+                    }
+                } else {
+                    state = LexerState::Error;
+                }
+                break;
+
+            case LexerState::While:
+                fileContent.get(c);
+                if (c == 'w') {
+                    fileContent.get(c);
+                    if (c == 'h') {
+                        fileContent.get(c);
+                        if (c == 'i') {
+                            fileContent.get(c);
+                            if (c == 'l') {
+                                fileContent.get(c);
+                                if (c == 'e') {
+                                    // push while loop
                                     state = LexerState::Start;
                                 } else {
                                     state = LexerState::Error;
@@ -497,60 +538,69 @@ void Lexer::processChar(char c,std::ifstream &fileContent, std::vector<TOKEN> &r
                     state = LexerState::Error;
                 }
                 break;
-        
-        case LexerState::Error:
-            throw std::runtime_error("Unexpected character sequence");
+
+            case LexerState::Error:
+                throw std::runtime_error("Unexpected character sequence");
         }
 
         if (state == LexerState::Start) {
-            c = get_next_char();
+            fileContent.get(c);
         }
     }
 }
 
+
 void Lexer::processVariable(char c, std::ifstream &fileContent, std::vector<TOKEN> &result) {
     std::string variableName;
 
-    
+
     TOKEN varToken;
     varToken.concept = TOKEN::TOKEN_CONCEPTS::VARIABLE;
     result.push_back(varToken);
 
-    
+    while (std::isspace(c) && fileContent.get(c)) {}
+
     while (fileContent.get(c)) {
+        std::cout << c << std::endl;
         if (std::isspace(c) || c == '=') {
             break;
         }
         variableName += c;
     }
 
-    
+
     if (std::find(private_words.begin(), private_words.end(), variableName) != private_words.end()) {
         throw std::runtime_error("Variable name cannot be a reserved keyword");
     }
 
-    if (std::find(vars.begin(),vars.end(),variableName) != vars.end()) {
+
+    if (table.getVariableValue(variableName).op != TOKEN::OPERATORS::UNKNOWN) {
         throw std::runtime_error("Variable name cannot be a declared variable");
     }
 
-    
+
     TOKEN varNameToken;
     varNameToken.concept = TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME;
     varNameToken.variableName = variableName;
-    vars.insert(variableName);
     result.push_back(varNameToken);
+    table.setVariableValue(variableName, varNameToken);
+
+
+    while (std::isspace(c) && fileContent.get(c)) {}
+
+
     
     if (c == '=') {
         TOKEN assignToken;
         assignToken.op = TOKEN::OPERATORS::EQUALS_OPERATOR;
         result.push_back(assignToken);
 
-
-        processAssignment( fileContent, result);
+        processAssignment(fileContent, result);
     } else {
         throw std::runtime_error("Expected '=' after variable declaration");
     }
 }
+
 
 
 
@@ -576,42 +626,47 @@ void Lexer::processString(char c,std::ifstream &fileContent, std::vector<TOKEN> 
 
 
 void Lexer::processAssignment(std::ifstream &fileContent, std::vector<TOKEN> &result) {
+    
     char c;
-    std::string expression;
-    int prevLength = vars.size();
+    TOKEN tok;
+    int prevLength = table.table.size();
 
     while (fileContent.get(c)) {
         if (std::isspace(c)) {
-            continue;
+            continue; 
         }
-        else if (c == '=') {
+
+        if (isalpha(c)) {
             
-            while (fileContent.get(c)) {
+            processChar(c, fileContent, result);
+        } else if (isdigit(c)) {
             
-                if (std::isspace(c) && (fileContent.peek() == '\n' || fileContent.peek() == EOF)) {
-            
-                    break;
-                }
-                expression.push_back(c);
+            std::string number;
+            number.push_back(c);
+
+            while (fileContent.get(c) && isdigit(c)) {
+                number.push_back(c);
             }
 
-            
-            TOKEN exprToken;
-            exprToken.concept = TOKEN::TOKEN_CONCEPTS::EXPRESSION;
-            exprToken.expression = expression;
-            result.push_back(exprToken);
-            if (expression.find("var")) {
-                throw std::runtime_error("Assignment expression contains 'var' keyword");
-            }
+            tok.concept = TOKEN::TOKEN_CONCEPTS::NUMBER;
+            tok.number = std::stoi(number);
+            result.push_back(tok);
 
-            return;
+            if (fileContent) fileContent.unget();
+        } else {
+
+            processOperator(c, fileContent, result);
         }
-        else {
-            
-            continue;
+
+
+        if (c == '\n' || fileContent.peek() == EOF) {
+            tok.op = TOKEN::OPERATORS::NEWLINE_OPERATOR;
+            result.push_back(tok);
+            break;
         }
     }
 
-
-    throw std::runtime_error("Invalid assignment format or missing '='");
+    if (table.table.size() != prevLength) {
+        throw std::runtime_error("Cannot declare a variable within a variable assignment.");
+    }
 }

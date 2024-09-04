@@ -16,6 +16,7 @@ class Compiler {
     ASTNodePtr root;
     void REPL();
     double evaluateAST(const ASTNodePtr& node);
+    SymbolTable table;
 };  
 
 #endif //COMPILER_H

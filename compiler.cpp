@@ -65,9 +65,6 @@ double Compiler::evaluateAST(const ASTNodePtr& node) {
                     return static_cast<double>(static_cast<int>(leftValue) & static_cast<int>(rightValue));
                 case TOKEN::OPERATORS::BIT_OR_OPERATOR:
                     return static_cast<double>(static_cast<int>(leftValue) | static_cast<int>(rightValue));
-
-
-                    
                 default:
                     throw std::runtime_error("Unsupported binary operator");
             }
@@ -91,6 +88,20 @@ double Compiler::evaluateAST(const ASTNodePtr& node) {
 
         case AST::Type::ParenthesizedExpression:
             return evaluateAST(node->left);
+
+        case AST::Type::Variable: {
+            auto varNode = dynamic_cast<VariableNode*>(node.get());
+            if (!varNode) throw std::runtime_error("Invalid variable node");
+
+            return table.getVariableValue(varNode->name).number;
+        }
+
+        case AST::Type::VariableExpression: {
+            auto varNode = dynamic_cast<VariableNode*>(node.get());
+            if (!varNode) throw std::runtime_error("Invalid variable node");
+
+            return table.getVariableValue(varNode->name).number;
+        }
 
         default:
             throw std::runtime_error("Unknown AST node type");
