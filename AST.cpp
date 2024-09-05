@@ -21,3 +21,8 @@ ASTNodePtr AST::makeUnaryOperationNode(TOKEN::OPERATORS op, ASTNodePtr operand) 
     node->left = std::move(operand);
     return node;
 }
+ASTNodePtr AST::makeStringNode(const std::string& value) {
+    auto node = std::make_unique<AST>(Type::String);
+    node->stringValue = value;
+    return node;
+}

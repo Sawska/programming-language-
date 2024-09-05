@@ -8,14 +8,14 @@
 
 class Compiler {
     public:
-    Compiler(Lexer lex) : lexer(lex), parser(Parser(lexer.read_file())), root(parser.parse()) {}
+    Compiler(Lexer lex) : lexer(lex), parser(Parser(lexer.read_file(),lexer.table)), root(parser.parse()), table(parser.table) {}
     void run();
     private:
     Lexer lexer;
     Parser parser;
     ASTNodePtr root;
     void REPL();
-    double evaluateAST(const ASTNodePtr& node);
+    std::variant<double,std::string> evaluateAST(const ASTNodePtr& node);
     SymbolTable table;
 };  
 

@@ -9,8 +9,8 @@
 
 class Parser {
 public:
-    Parser(const std::vector<TOKEN>& tokens) 
-        : tokens(tokens), index(0) {}
+    Parser(const std::vector<TOKEN>& tokens,SymbolTable table) 
+        : tokens(tokens), index(0), table(table)   {}
 
     ASTNodePtr parse();
     ASTNodePtr parseExpression();

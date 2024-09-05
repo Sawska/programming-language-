@@ -25,7 +25,7 @@ ASTNodePtr Parser::parseLogicalExpression() {
             token.op == TOKEN::OPERATORS::RIGHT_SHIFT_EQUAL_OPERATOR ||
             token.op == TOKEN::OPERATORS::NOT_EQUALS_OPERATOR ||
             token.op == TOKEN::OPERATORS::BIT_AND_OPERATOR ||
-        token.op == TOKEN::OPERATORS::BIT_OR_OPERATOR) {
+            token.op == TOKEN::OPERATORS::BIT_OR_OPERATOR) {
             index++;
             auto right = parseExpression();
             left = AST::makeBinaryOperationNode(token.op, std::move(left), std::move(right));
@@ -59,6 +59,8 @@ ASTNodePtr Parser::parseVariableOrAssignment() {
     TOKEN variableValue = table.getVariableValue(varName);
 
     if (variableValue.op == TOKEN::OPERATORS::UNKNOWN) {
+        
+        
         throw std::runtime_error("Undefined variable: " + varName);
     }
 
@@ -126,11 +128,20 @@ ASTNodePtr Parser::parseFactor() {
     const TOKEN& token = tokens[index];
 
     std::cout << "Parsing token: " << token.op << std::endl;
+    std::cout << "Parsing token: concept=" << token.concept << ", op=" << token.op << std::endl;
 
+
+    
     if (token.concept == TOKEN::TOKEN_CONCEPTS::NUMBER) {
         index++;
         return AST::makeNumberNode(token.number);
-    } else if (token.concept == TOKEN::TOKEN_CONCEPTS::OPEN_BRACKETS) {
+    }
+    else if (token.concept == TOKEN::TOKEN_CONCEPTS::STRING) {
+        index++;
+        return AST::makeStringNode(token.string);
+    }
+
+    else if (token.concept == TOKEN::TOKEN_CONCEPTS::OPEN_BRACKETS) {
         index++;
         auto expr = parseExpression();
 
@@ -139,16 +150,22 @@ ASTNodePtr Parser::parseFactor() {
         }
         index++;
         return expr;
-    } else if (token.op == TOKEN::OPERATORS::NOT_OPERATOR ||
-         token.op == TOKEN::OPERATORS::INCREMENT_OPERATOR ||
-         token.op == TOKEN::OPERATORS::DECREMENT_OPERATOR ||
-         token.op == TOKEN::OPERATORS::BIT_NOT_OPERATOR) {
+    }
+    
+    else if (token.op == TOKEN::OPERATORS::NOT_OPERATOR ||
+             token.op == TOKEN::OPERATORS::INCREMENT_OPERATOR ||
+             token.op == TOKEN::OPERATORS::DECREMENT_OPERATOR ||
+             token.op == TOKEN::OPERATORS::BIT_NOT_OPERATOR) {
         index++;
         auto operand = parseFactor();
         return AST::makeUnaryOperationNode(token.op, std::move(operand));
-    }  else if(token.concept == TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME) {
+    }
+
+    else if (token.concept == TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME || token.concept == TOKEN::TOKEN_CONCEPTS::VARIABLE) {
         return parseVariableOrAssignment();
-    } else if(token.op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
+    }
+
+    else if (token.op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
         index++;
         return nullptr;
     }

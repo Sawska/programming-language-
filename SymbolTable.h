@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <string>
 #include "token.h"
+#include <iostream>
 
 class SymbolTable {
     public:

@@ -19,11 +19,13 @@ public:
         ParenthesizedExpression,
         Variable,
         VariableExpression,
+        String,  
         Unknown,
     };
 
     Type type;
-    double value;
+    double value;             
+    std::string stringValue;  
     TOKEN::OPERATORS op;
     ASTNodePtr left;
     ASTNodePtr right;
@@ -33,10 +35,13 @@ public:
 
     virtual ~AST() = default;
 
+    
     static ASTNodePtr makeNumberNode(double value);
     static ASTNodePtr makeBinaryOperationNode(TOKEN::OPERATORS op, ASTNodePtr left, ASTNodePtr right);
     static ASTNodePtr makeUnaryOperationNode(TOKEN::OPERATORS op, ASTNodePtr operand);
+    static ASTNodePtr makeStringNode(const std::string& value);  
 };
+
 
 class VariableNode : public AST {
 public:
@@ -51,11 +56,10 @@ public:
     }
 };
 
+
 class ExpressionNode : public AST {
 public:
     ExpressionNode(Type type) : AST(type) {}
 };
-
-
 
 #endif // AST_H

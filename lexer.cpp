@@ -36,10 +36,13 @@ std::vector<TOKEN> Lexer::read_file() {
         }
         else if (check_if_operator(c)) {
             processOperator(c, fileContent, result);
-        } else if(check_if_char(c) || c == '\'' || c == '"')
+        } else if(check_if_char(c))
         {
 
             processChar(c, fileContent, result);
+        } else if(c == '\'' || c == '"')
+        {
+            processString(c, fileContent, result);
         }
         else {
             std::cerr << "Unexpected character encountered: " << c << std::endl;
@@ -242,15 +245,6 @@ bool Lexer::check_if_char(char c) {
 
 void Lexer::processChar(char c, std::ifstream &fileContent, std::vector<TOKEN> &result) {
     std::cout << "starting processing chars" << std::endl;
-    switch (c) {
-        case '\'':
-        case '"':
-            processString(c, fileContent, result);
-            return;
-        default:
-            break;
-    }
-    
     TOKEN tok;
     LexerState state = LexerState::Start;
 
@@ -316,7 +310,7 @@ void Lexer::processChar(char c, std::ifstream &fileContent, std::vector<TOKEN> &
                         std::cout << c << std::endl;
                         state = LexerState::Start;
                         push_operator_token(TOKEN::TOKEN_CONCEPTS::VARIABLE);
-                        processVariable(c,fileContent,result);
+                        processVariable(fileContent,result);
                         return;
                     } else {
                         state = LexerState::Error;
@@ -416,6 +410,7 @@ void Lexer::processChar(char c, std::ifstream &fileContent, std::vector<TOKEN> &
                         varToken.variableName = buffer;
                         result.push_back(varToken);
                     } else {
+                        
                         throw std::runtime_error("Undefined variable: " + buffer);
                     }
                     buffer.clear();
@@ -550,34 +545,35 @@ void Lexer::processChar(char c, std::ifstream &fileContent, std::vector<TOKEN> &
 }
 
 
-void Lexer::processVariable(char c, std::ifstream &fileContent, std::vector<TOKEN> &result) {
+void Lexer::processVariable(std::ifstream &fileContent, std::vector<TOKEN> &result) {
     std::string variableName;
-
+    char c;
 
     TOKEN varToken;
     varToken.concept = TOKEN::TOKEN_CONCEPTS::VARIABLE;
     result.push_back(varToken);
 
-    while (std::isspace(c) && fileContent.get(c)) {}
+
+    while (fileContent.get(c) && std::isspace(c)) {}
+
 
     while (fileContent.get(c)) {
-        std::cout << c << std::endl;
         if (std::isspace(c) || c == '=') {
             break;
         }
+        std::cout << c << std::endl;
         variableName += c;
     }
+    std::cout << variableName << std::endl;
 
 
     if (std::find(private_words.begin(), private_words.end(), variableName) != private_words.end()) {
         throw std::runtime_error("Variable name cannot be a reserved keyword");
     }
 
-
     if (table.getVariableValue(variableName).op != TOKEN::OPERATORS::UNKNOWN) {
-        throw std::runtime_error("Variable name cannot be a declared variable");
+        throw std::runtime_error("Variable name already declared");
     }
-
 
     TOKEN varNameToken;
     varNameToken.concept = TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME;
@@ -586,20 +582,21 @@ void Lexer::processVariable(char c, std::ifstream &fileContent, std::vector<TOKE
     table.setVariableValue(variableName, varNameToken);
 
 
-    while (std::isspace(c) && fileContent.get(c)) {}
+    while (fileContent.get(c) && std::isspace(c)) {}
 
 
-    
     if (c == '=') {
         TOKEN assignToken;
         assignToken.op = TOKEN::OPERATORS::EQUALS_OPERATOR;
         result.push_back(assignToken);
-
-        processAssignment(fileContent, result);
+        processAssignment(fileContent, result); 
     } else {
         throw std::runtime_error("Expected '=' after variable declaration");
     }
 }
+
+
+
 
 
 
@@ -626,7 +623,6 @@ void Lexer::processString(char c,std::ifstream &fileContent, std::vector<TOKEN> 
 
 
 void Lexer::processAssignment(std::ifstream &fileContent, std::vector<TOKEN> &result) {
-    
     char c;
     TOKEN tok;
     int prevLength = table.table.size();
@@ -636,28 +632,25 @@ void Lexer::processAssignment(std::ifstream &fileContent, std::vector<TOKEN> &re
             continue; 
         }
 
-        if (isalpha(c)) {
-            
+        if (std::isalpha(c)) {
             processChar(c, fileContent, result);
-        } else if (isdigit(c)) {
-            
+        } else if (std::isdigit(c)) {
             std::string number;
             number.push_back(c);
 
-            while (fileContent.get(c) && isdigit(c)) {
+            while (fileContent.get(c) && std::isdigit(c)) {
                 number.push_back(c);
             }
 
             tok.concept = TOKEN::TOKEN_CONCEPTS::NUMBER;
             tok.number = std::stoi(number);
             result.push_back(tok);
-
             if (fileContent) fileContent.unget();
+        } else if(c == '\'' || c == '"') {
+            processString(c, fileContent, result);
         } else {
-
             processOperator(c, fileContent, result);
         }
-
 
         if (c == '\n' || fileContent.peek() == EOF) {
             tok.op = TOKEN::OPERATORS::NEWLINE_OPERATOR;
@@ -670,3 +663,4 @@ void Lexer::processAssignment(std::ifstream &fileContent, std::vector<TOKEN> &re
         throw std::runtime_error("Cannot declare a variable within a variable assignment.");
     }
 }
+
