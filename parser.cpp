@@ -43,30 +43,27 @@ ASTNodePtr Parser::parseVariableOrAssignment() {
     index++;
 
     if (index < tokens.size() && tokens[index].op == TOKEN::OPERATORS::EQUALS_OPERATOR) {
-
         index++;
         auto expr = parseExpression();
-
 
         if (index < tokens.size() && tokens[index].op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
             index++;
         }
-
-        return std::make_unique<VariableNode>(varName, std::move(expr));
+            
+        table.setVariableValue(varName, std::move(expr));
+        return AST::makeNumberNode(0);
     }
 
-
-    TOKEN variableValue = table.getVariableValue(varName);
-
-    if (variableValue.op == TOKEN::OPERATORS::UNKNOWN) {
-        
-        
+    ASTNodePtr variableNode = table.getVariableValue(varName);
+    if (!variableNode) {
+        std::cerr << "Undefined variable: " << varName << std::endl;
         throw std::runtime_error("Undefined variable: " + varName);
     }
 
-
-    return std::make_unique<VariableNode>(varName, AST::makeNumberNode(variableValue.number));
+    return variableNode;
 }
+
+
 
 
 
@@ -127,20 +124,16 @@ ASTNodePtr Parser::parseFactor() {
 
     const TOKEN& token = tokens[index];
 
-    std::cout << "Parsing token: " << token.op << std::endl;
-    std::cout << "Parsing token: concept=" << token.concept << ", op=" << token.op << std::endl;
-
-
-    
     if (token.concept == TOKEN::TOKEN_CONCEPTS::NUMBER) {
         index++;
         return AST::makeNumberNode(token.number);
     }
+    
     else if (token.concept == TOKEN::TOKEN_CONCEPTS::STRING) {
         index++;
         return AST::makeStringNode(token.string);
     }
-
+    
     else if (token.concept == TOKEN::TOKEN_CONCEPTS::OPEN_BRACKETS) {
         index++;
         auto expr = parseExpression();
@@ -158,17 +151,27 @@ ASTNodePtr Parser::parseFactor() {
              token.op == TOKEN::OPERATORS::BIT_NOT_OPERATOR) {
         index++;
         auto operand = parseFactor();
+        if (!operand) throw std::runtime_error("Invalid operand for unary operation");
         return AST::makeUnaryOperationNode(token.op, std::move(operand));
-    }
+    } 
+    
+    else if (token.concept == TOKEN::TOKEN_CONCEPTS::VARIABLE) {
+        index++;  
 
-    else if (token.concept == TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME || token.concept == TOKEN::TOKEN_CONCEPTS::VARIABLE) {
-        return parseVariableOrAssignment();
+    
+        if (index < tokens.size() && tokens[index].concept == TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME) {
+            return parseVariableOrAssignment();
+        } else {
+            throw std::runtime_error("Expected variable name after variable declaration");
+        }
     }
-
+    
     else if (token.op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
         index++;
-        return nullptr;
+
+        return AST::makeNumberNode(0); 
     }
+    
     else {
         std::cerr << "Unexpected token: " << token.op << " at index: " << index << std::endl;
         throw std::runtime_error("Unexpected token: " + std::to_string(token.op));

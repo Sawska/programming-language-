@@ -14,6 +14,9 @@
 
 class Lexer {
     public:
+    Lexer() = default;
+    Lexer(Lexer&&) = default;  
+    Lexer& operator=(Lexer&&) = default; 
     std::vector<TOKEN> read_file();
     SymbolTable table;
     private:

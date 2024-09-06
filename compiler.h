@@ -1,22 +1,31 @@
 #ifndef COMPILER_H
-
 #define COMPILER_H
-#include "parser.h"
+
 #include "lexer.h"
+#include "parser.h" 
+#include "SymbolTable.h"
 
 #define ISREPL 0
 
 class Compiler {
-    public:
-    Compiler(Lexer lex) : lexer(lex), parser(Parser(lexer.read_file(),lexer.table)), root(parser.parse()), table(parser.table) {}
+public:
+    Compiler(Lexer& lex) 
+        : lexer(lex), 
+          parser(lexer.read_file(), std::move(lexer.table)), 
+          table(std::move(parser.table)) 
+    {
+        root = parser.parse();
+    }
+
     void run();
-    private:
-    Lexer lexer;
+    std::variant<double, std::string> evaluateAST(const ASTNodePtr& node);
+
+private:
+    Lexer& lexer;
     Parser parser;
     ASTNodePtr root;
     void REPL();
-    std::variant<double,std::string> evaluateAST(const ASTNodePtr& node);
     SymbolTable table;
-};  
+};
 
-#endif //COMPILER_H
+#endif // COMPILER_H

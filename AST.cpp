@@ -1,28 +1,21 @@
 #include "AST.h"
 
-ASTNodePtr AST::makeNumberNode(double value)
-{
-    auto node = std::make_unique<AST>(AST::Type::Number);
-    node->value = value;
-    return node;
+ASTNodePtr AST::makeNumberNode(double value) {
+    return std::make_unique<NumberNode>(value);
 }
 
-ASTNodePtr AST::makeBinaryOperationNode(TOKEN::OPERATORS op, ASTNodePtr left, ASTNodePtr right) {
-  auto node = std::make_unique<AST>(AST::Type::BinaryOperation);
-    node->op = op;
-    node->left = std::move(left);
-    node->right = std::move(right);
-    return node;
-}
+
 
 ASTNodePtr AST::makeUnaryOperationNode(TOKEN::OPERATORS op, ASTNodePtr operand) {
-    auto node = std::make_unique<AST>(AST::Type::UnaryOperation);
-    node->op = op;
-    node->left = std::move(operand);
-    return node;
+    return std::make_unique<UnaryOperationNode>(op, std::move(operand));
 }
+
 ASTNodePtr AST::makeStringNode(const std::string& value) {
-    auto node = std::make_unique<AST>(Type::String);
-    node->stringValue = value;
-    return node;
+    return std::make_unique<StringNode>(value);
 }
+
+
+ASTNodePtr AST::makeBinaryOperationNode(TOKEN::OPERATORS op, ASTNodePtr left, ASTNodePtr right) {
+    return std::make_unique<BinaryOperationNode>(op, std::move(left), std::move(right));
+}
+

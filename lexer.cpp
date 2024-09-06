@@ -259,7 +259,6 @@ void Lexer::processChar(char c, std::ifstream &fileContent, std::vector<TOKEN> &
     std::string buffer;
 
     while (fileContent.good()) {
-        std::cout << c << std::endl;
         switch (state) {
             case LexerState::Start:
                 if (c == 'l') {
@@ -309,7 +308,6 @@ void Lexer::processChar(char c, std::ifstream &fileContent, std::vector<TOKEN> &
                     if (c == 't') {
                         std::cout << c << std::endl;
                         state = LexerState::Start;
-                        push_operator_token(TOKEN::TOKEN_CONCEPTS::VARIABLE);
                         processVariable(fileContent,result);
                         return;
                     } else {
@@ -404,7 +402,7 @@ void Lexer::processChar(char c, std::ifstream &fileContent, std::vector<TOKEN> &
                     state = LexerState::Assignment;
                 } else {
                     
-                    if (table.getVariableValue(buffer).op == TOKEN::OPERATORS::UNKNOWN) {
+                    if (table.getVariableValue(buffer)) {
                         TOKEN varToken;
                         varToken.concept = TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME;
                         varToken.variableName = buffer;
@@ -553,47 +551,43 @@ void Lexer::processVariable(std::ifstream &fileContent, std::vector<TOKEN> &resu
     varToken.concept = TOKEN::TOKEN_CONCEPTS::VARIABLE;
     result.push_back(varToken);
 
-
     while (fileContent.get(c) && std::isspace(c)) {}
 
+    if (fileContent.eof() || !fileContent.good()) {
+        std::cerr << "Error: Unexpected end of file or read failure while skipping whitespace" << std::endl;
+        return;
+    }
 
-    while (fileContent.get(c)) {
+    do {
         if (std::isspace(c) || c == '=') {
             break;
         }
-        std::cout << c << std::endl;
         variableName += c;
-    }
-    std::cout << variableName << std::endl;
-
+    } while (fileContent.get(c));
 
     if (std::find(private_words.begin(), private_words.end(), variableName) != private_words.end()) {
         throw std::runtime_error("Variable name cannot be a reserved keyword");
     }
 
-    if (table.getVariableValue(variableName).op != TOKEN::OPERATORS::UNKNOWN) {
-        throw std::runtime_error("Variable name already declared");
-    }
+    
 
     TOKEN varNameToken;
     varNameToken.concept = TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME;
     varNameToken.variableName = variableName;
     result.push_back(varNameToken);
-    table.setVariableValue(variableName, varNameToken);
-
 
     while (fileContent.get(c) && std::isspace(c)) {}
-
 
     if (c == '=') {
         TOKEN assignToken;
         assignToken.op = TOKEN::OPERATORS::EQUALS_OPERATOR;
         result.push_back(assignToken);
-        processAssignment(fileContent, result); 
+        processAssignment(fileContent, result);
     } else {
         throw std::runtime_error("Expected '=' after variable declaration");
     }
 }
+
 
 
 
