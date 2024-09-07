@@ -19,3 +19,6 @@ ASTNodePtr AST::makeBinaryOperationNode(TOKEN::OPERATORS op, ASTNodePtr left, AS
     return std::make_unique<BinaryOperationNode>(op, std::move(left), std::move(right));
 }
 
+ASTNodePtr AST::makeEmptyNode() {
+    return std::make_unique<EmptyNode>();
+}

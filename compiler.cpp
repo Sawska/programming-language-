@@ -35,6 +35,9 @@ std::variant<double, std::string> Compiler::evaluateAST(const ASTNodePtr& node) 
         case AST::Type::String:
             return node->stringValue;
 
+        case AST::Type::Empty: 
+             return evaluateAST(node->left);
+
         case AST::Type::BinaryOperation: {
             auto leftValue = evaluateAST(node->left);
             auto rightValue = evaluateAST(node->right);
@@ -134,7 +137,7 @@ std::variant<double, std::string> Compiler::evaluateAST(const ASTNodePtr& node) 
             if (!varNode) throw std::runtime_error("Invalid variable node");
             return evaluateAST(varNode->value);
         }
-        
+
         default:
             throw std::runtime_error("Unknown AST node type");
     }

@@ -17,6 +17,7 @@ public:
 
     ASTNodePtr getVariableValue(const std::string& name) const;
     void setVariableValue(const std::string& name, ASTNodePtr value);
+    void listVariables() const;
 };
 
 #endif //SYMBOL_TABLE_H

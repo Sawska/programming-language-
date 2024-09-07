@@ -20,6 +20,7 @@ public:
         VariableExpression,
         String,
         Unknown,
+        Empty
     };
 
     Type type;
@@ -42,6 +43,7 @@ public:
     static ASTNodePtr makeBinaryOperationNode(TOKEN::OPERATORS op, ASTNodePtr left, ASTNodePtr right);
     static ASTNodePtr makeUnaryOperationNode(TOKEN::OPERATORS op, ASTNodePtr operand);
     static ASTNodePtr makeStringNode(const std::string& value);
+    static ASTNodePtr makeEmptyNode();
 };
 
 class NumberNode : public AST {
@@ -106,5 +108,16 @@ public:
         return std::make_unique<VariableNode>(name, value ? value->clone() : nullptr);
     }
 };
+
+class EmptyNode : public AST {
+public:
+    EmptyNode() : AST(Type::Empty) {} 
+
+    std::unique_ptr<AST> clone() const override {
+        return std::make_unique<EmptyNode>();
+    }
+};
+
+
 
 #endif // AST_H

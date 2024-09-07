@@ -5,6 +5,7 @@ ASTNodePtr Parser::parse() {
 
     std::cout << "Starting of parsing" << std::endl;
 
+    // Ensure that all tokens have been consumed
     if (index < tokens.size()) {
         throw std::runtime_error("Unexpected tokens after parsing");
     }
@@ -29,6 +30,9 @@ ASTNodePtr Parser::parseLogicalExpression() {
             index++;
             auto right = parseExpression();
             left = AST::makeBinaryOperationNode(token.op, std::move(left), std::move(right));
+        } else if (token.op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
+            index++; // Skip newline and continue
+            left = parseLogicalExpression(); // Re-evaluate to handle possible new statements
         } else {
             break;
         }
@@ -36,36 +40,6 @@ ASTNodePtr Parser::parseLogicalExpression() {
 
     return left;
 }
-
-ASTNodePtr Parser::parseVariableOrAssignment() {
-    const TOKEN& token = tokens[index];
-    std::string varName = token.variableName;
-    index++;
-
-    if (index < tokens.size() && tokens[index].op == TOKEN::OPERATORS::EQUALS_OPERATOR) {
-        index++;
-        auto expr = parseExpression();
-
-        if (index < tokens.size() && tokens[index].op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
-            index++;
-        }
-            
-        table.setVariableValue(varName, std::move(expr));
-        return AST::makeNumberNode(0);
-    }
-
-    ASTNodePtr variableNode = table.getVariableValue(varName);
-    if (!variableNode) {
-        std::cerr << "Undefined variable: " << varName << std::endl;
-        throw std::runtime_error("Undefined variable: " + varName);
-    }
-
-    return variableNode;
-}
-
-
-
-
 
 ASTNodePtr Parser::parseExpression() {
     auto left = parseTerm();
@@ -85,17 +59,16 @@ ASTNodePtr Parser::parseExpression() {
             index++;
             auto right = parseTerm();
             left = AST::makeBinaryOperationNode(token.op, std::move(left), std::move(right));
-        } else if(token.op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
-            index++;
-        }
-        else {
+        } else if (token.op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
+            index++; // Skip newline and continue
+            left = parseTerm(); // Re-evaluate term after newline
+        } else {
             break;
         }
     }
 
     return left;
 }
-
 
 ASTNodePtr Parser::parseTerm() {
     auto left = parseFactor();
@@ -109,6 +82,9 @@ ASTNodePtr Parser::parseTerm() {
             index++;
             auto right = parseFactor();
             left = AST::makeBinaryOperationNode(token.op, std::move(left), std::move(right));
+        } else if (token.op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
+            index++; // Skip newline and continue
+            left = parseFactor(); // Re-evaluate factor after newline
         } else {
             break;
         }
@@ -156,24 +132,65 @@ ASTNodePtr Parser::parseFactor() {
     } 
     
     else if (token.concept == TOKEN::TOKEN_CONCEPTS::VARIABLE) {
-        index++;  
-
-    
-        if (index < tokens.size() && tokens[index].concept == TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME) {
-            return parseVariableOrAssignment();
-        } else {
-            throw std::runtime_error("Expected variable name after variable declaration");
-        }
-    }
-    
-    else if (token.op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
         index++;
-
-        return AST::makeNumberNode(0); 
+        return parseVariableOrAssignment();
+    } else if (token.concept == TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME) {
+        return handleVariableReference();
     }
     
     else {
         std::cerr << "Unexpected token: " << token.op << " at index: " << index << std::endl;
         throw std::runtime_error("Unexpected token: " + std::to_string(token.op));
     }
+}
+
+ASTNodePtr Parser::parseVariableOrAssignment() {
+    if (index >= tokens.size() || tokens[index].concept != TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME) {
+        std::cerr << "Expected variable name but got a different token" << std::endl;
+        throw std::runtime_error("Expected variable name");
+    }
+
+    const TOKEN& token = tokens[index];
+    std::string varName = token.variableName;
+    index++; // Move past the variable name
+
+    // Check if this is an assignment
+    if (index < tokens.size() && tokens[index].op == TOKEN::OPERATORS::EQUALS_OPERATOR) {
+        index++; // Move past the equals operator
+        auto expr = parseExpression(); // Parse the right-hand side of the assignment
+
+        // Handle optional newline after assignment
+        if (index < tokens.size() && tokens[index].op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
+            index++;
+    }
+        table.setVariableValue(varName, std::move(expr)); // Store the value in the symbol table
+
+        return AST::makeEmptyNode(); // Return an empty node for the assignment
+    }
+
+    // If it's not an assignment, treat it as a reference to the variable
+    return handleVariableReference();
+}
+
+ASTNodePtr Parser::handleVariableReference() {
+    if (index >= tokens.size()) {
+        throw std::runtime_error("Unexpected end of tokens");
+    }
+    table.listVariables();
+    const TOKEN& token = tokens[index];
+    if (token.concept != TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME) {
+        throw std::runtime_error("Expected variable name");
+    }
+
+    std::string varName = token.variableName;
+    index++; 
+
+    
+    ASTNodePtr variableNode = table.getVariableValue(varName);
+    if (!variableNode) {
+        std::cerr << "Undefined variable: " << varName << std::endl;
+        throw std::runtime_error("Undefined variable: " + varName);
+    }
+
+    return variableNode; // 
 }

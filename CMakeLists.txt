@@ -5,12 +5,12 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 add_executable(PROGRAMMING_LANGUAGE
+    main.cpp
     parser.cpp
     lexer.cpp
     AST.cpp
     token.h
     compiler.cpp
-    main.cpp
     SymbolTable.cpp   
     
 )

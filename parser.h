@@ -23,6 +23,7 @@ public:
     ASTNodePtr parseFactor();
     ASTNodePtr parseLogicalExpression();
     ASTNodePtr parseVariableOrAssignment();
+    ASTNodePtr handleVariableReference();
     SymbolTable table;
 
 private:
