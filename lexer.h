@@ -33,7 +33,7 @@ class Lexer {
     void handleForLoop(std::ifstream &fileContent, std::vector<TOKEN> &result);
     void handleIfStatment(std::ifstream &fileContent, std::vector<TOKEN> &result);
     void handleElseStatment(std::ifstream &fileContent, std::vector<TOKEN> &result);
-    std::unordered_set <std::string> private_words { "function" "let" "for" "while" "if" "else" "else if" "for", "class"};
+    std::unordered_set <std::string> private_words { "function" "let" "for" "while" "if" "else" "else if" "for", "class","break" "continue", "return"};
 };
 
 enum class LexerState {
@@ -49,6 +49,15 @@ enum class LexerState {
     forLoop,
     Assignment,
     Error,
+    Break,
+    Continue,
+    Return,
+    LetKeyword,
+    ClassState,
+    FunctionState,
+    ElseStatement,
+    IfStatement,
+    ForLoop,
 };
 
 

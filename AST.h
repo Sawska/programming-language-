@@ -44,6 +44,7 @@ public:
     static ASTNodePtr makeUnaryOperationNode(TOKEN::OPERATORS op, ASTNodePtr operand);
     static ASTNodePtr makeStringNode(const std::string& value);
     static ASTNodePtr makeEmptyNode();
+    static ASTNodePtr makeSequenceNode(ASTNodePtr left, ASTNodePtr right);
 };
 
 class NumberNode : public AST {

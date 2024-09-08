@@ -22,3 +22,7 @@ ASTNodePtr AST::makeBinaryOperationNode(TOKEN::OPERATORS op, ASTNodePtr left, AS
 ASTNodePtr AST::makeEmptyNode() {
     return std::make_unique<EmptyNode>();
 }
+ASTNodePtr AST::makeSequenceNode(ASTNodePtr left, ASTNodePtr right) {
+    auto sequenceNode = std::make_unique<BinaryOperationNode>(TOKEN::OPERATORS::SEQUENCE_OPERATOR, std::move(left), std::move(right));
+    return sequenceNode;
+}

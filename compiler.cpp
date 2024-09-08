@@ -36,9 +36,15 @@ std::variant<double, std::string> Compiler::evaluateAST(const ASTNodePtr& node) 
             return node->stringValue;
 
         case AST::Type::Empty: 
-             return evaluateAST(node->left);
+             return {};
 
         case AST::Type::BinaryOperation: {
+           
+            if (node->op == TOKEN::OPERATORS::SEQUENCE_OPERATOR) {
+                evaluateAST(node->left);
+                return evaluateAST(node->right);
+            }
+
             auto leftValue = evaluateAST(node->left);
             auto rightValue = evaluateAST(node->right);
 
@@ -94,10 +100,6 @@ std::variant<double, std::string> Compiler::evaluateAST(const ASTNodePtr& node) 
                 case TOKEN::OPERATORS::RIGHT_SHIFT_OPERATOR:
                     return static_cast<double>(static_cast<int>(leftNum) >> static_cast<int>(rightNum));
                 case TOKEN::OPERATORS::LEFT_SHIFT_OPERATOR:
-                    return static_cast<double>(static_cast<int>(leftNum) << static_cast<int>(rightNum));
-                case TOKEN::OPERATORS::RIGHT_SHIFT_EQUAL_OPERATOR:
-                    return static_cast<double>(static_cast<int>(leftNum) >> static_cast<int>(rightNum));
-                case TOKEN::OPERATORS::LEFT_SHIFT_EQUAL_OPERATOR:
                     return static_cast<double>(static_cast<int>(leftNum) << static_cast<int>(rightNum));
                 case TOKEN::OPERATORS::BIT_AND_OPERATOR:
                     return static_cast<double>(static_cast<int>(leftNum) & static_cast<int>(rightNum));

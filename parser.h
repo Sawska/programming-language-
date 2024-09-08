@@ -13,7 +13,7 @@ public:
     Parser(Parser&&) = default; 
     Parser& operator=(Parser&&) = default; 
     
-    // Use SymbolTable&& to move the table
+    
     Parser(const std::vector<TOKEN>& tokens, SymbolTable&& table)
         : tokens(tokens), index(0), table(std::move(table)) {}
 

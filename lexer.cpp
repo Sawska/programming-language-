@@ -281,289 +281,61 @@ void Lexer::processChar(char c, std::ifstream &fileContent, std::vector<TOKEN> &
         result.push_back(tok);
     };
 
-    
-
     std::string buffer;
+    buffer.push_back(c);
 
-    while (fileContent.good()) {
-        switch (state) {
-            case LexerState::Start:
-                if (c == 'l') {
-                    state = LexerState::LetKeywoard;
-                    fileContent.get(c);
-                    continue;
-                } else if (c == 'w') {
-                    state = LexerState::While;
-                    fileContent.get(c);
-                    continue;
-                } else if (c == 'f') {
-                    state = LexerState::forLoop;
-                    fileContent.get(c);
-                    continue;
-                } else if (c == 'i') {
-                    state = LexerState::IfStatment;
-                    fileContent.get(c);
-                    continue;
-                } else if (c == 'e') {
-                    state = LexerState::elseStatment;
-                    fileContent.get(c);
-                    continue;
-                } else if (c == 'f') {
-                    state = LexerState::functionState;
-                    fileContent.get(c);
-                    continue;
-                } else if (c == 'c') {
-                    state = LexerState::classState;
-                    fileContent.get(c);
-                    continue;
-                } else if (std::isalpha(c) || c == '_') {
-                    state = LexerState::VariableName;
-                    buffer.push_back(c);
-                    continue;
-                } else {
-                    state = LexerState::Error;
-                }
-                break;
-                
-            case LexerState::LetKeywoard:
-            
-            
-                if (c == 'e') {
-                    fileContent.get(c);
-                            
-                    if (c == 't') {
-                        state = LexerState::Start;
-                        processVariable(fileContent,result);
-                        return;
-                    } else {
-                        state = LexerState::Error;
-                    }
-                } else {
-                    state = LexerState::Error;
-                }
-                break;
+   
+     while (fileContent.get(c) && (std::isalnum(c) || c == '_')) {
+        buffer.push_back(c);
+    }
 
-            case LexerState::classState:
-                if (c == 'l') {
-                    fileContent.get(c);
-                    if (c == 'a') {
-                        fileContent.get(c);
-                        if (c == 's') {
-                            fileContent.get(c);
-                            if (c == 's') {
-                                // push class
-                            } else {
-                                state = LexerState::Error;
-                            }
-                        } else {
-                            state = LexerState::Error;
-                        }
-                    } else {
-                        state = LexerState::Error;
-                    }
-                } else {
-                    state = LexerState::Error;
-                }
-                break;
+    // Handle known keywords
+    if (buffer == "let") {
+        state = LexerState::Start;
+        buffer.clear();
+        processVariable(fileContent, result);
+        return;
+    } else if (buffer == "function" || buffer == "for" || buffer == "while" || 
+               buffer == "if" || buffer == "else" || buffer == "class" || 
+               buffer == "break" || buffer == "continue" || buffer == "return") {
+        // Add handling logic for each keyword if necessary
+    } else {
+        state = LexerState::VariableName;
+    }
 
-            case LexerState::functionState:
-                if (c == 'u') {
-                    fileContent.get(c);
-                    if (c == 'n') {
-                        fileContent.get(c);
-                        if (c == 'c') {
-                            fileContent.get(c);
-                            if (c == 't') {
-                                fileContent.get(c);
-                                if (c == 'i') {
-                                    fileContent.get(c);
-                                    if (c == 'o') {
-                                        fileContent.get(c);
-                                        if (c == 'n') {
-                                            // push function
-                                        } else {
-                                            state = LexerState::Error;
-                                        }
-                                    } else {
-                                        state = LexerState::Error;
-                                    }
-                                } else {
-                                    state = LexerState::Error;
-                                }
-                            } else {
-                                state = LexerState::Error;
-                            }
-                        } else {
-                            state = LexerState::Error;
-                        }
-                    } else {
-                        state = LexerState::Error;
-                    }
-                } else {
-                    state = LexerState::Error;
-                }
-                break;
-             case LexerState::VariableName:
-                std::cout << "i'm here" << std::endl;
-                while (fileContent.get(c) && (std::isalnum(c) || c == '_')) {
-                    std::cout << "Processing variable name character: " << c << std::endl;
-                    buffer.push_back(c);
-                }
-
-                
-                if (buffer.empty()) {
-                    throw std::runtime_error("Unexpected empty variable name");
-                }
-                
-                std::cout << "i'm here1" << std::endl;
-                
-                varToken.concept = TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME;
-                varToken.variableName = buffer;
-                result.push_back(varToken);
-                buffer.clear();
-                
-                if (c == '=') {
-                    std::cout << "Processing assignment operator" << std::endl;
-                    TOKEN assignToken;
-                    assignToken.op = TOKEN::OPERATORS::EQUALS_OPERATOR;
-                    result.push_back(assignToken);
-                    state = LexerState::Assignment;
-                    if (!fileContent.get(c)) {
-                        std::cout << "Error reading the file" << std::endl;
-                        return;
-                    }
-                } else {
-                    
-                    while (std::isspace(c)) {
-                        if (!fileContent.get(c)) break;
-                    }
-                    fileContent.unget(); 
-                    state = LexerState::Start;
-                }
-                break;
-            case LexerState::Assignment:
-                processAssignment(fileContent, result);
-                return;
-                break;
-
-            case LexerState::elseStatment:
-                if (c == 'l') {
-                    fileContent.get(c);
-                    if (c == 's') {
-                        fileContent.get(c);
-                        if (c == 'e') {
-                            // push else
-                        } else {
-                            state = LexerState::Error;
-                        }
-                    } else {
-                        state = LexerState::Error;
-                    }
-                } else {
-                    state = LexerState::Error;
-                }
-                break;
-
-            case LexerState::IfStatment:
-                fileContent.get(c);
-                if (c == 'f') {
-                    fileContent.get(c);
-                    if (c == 'e') {
-                        fileContent.get(c);
-                        if (c == 'l') {
-                            fileContent.get(c);
-                            if (c == 's') {
-                                fileContent.get(c);
-                                if (c == 'e') {
-                                    // push if else
-                                } else {
-                                    state = LexerState::Error;
-                                }
-                            } else {
-                                state = LexerState::Error;
-                            }
-                        } else {
-                            state = LexerState::Error;
-                        }
-                    } else {
-                        // push if statement
-                    }
-                } else {
-                    state = LexerState::Error;
-                }
-                break;
-
-            case LexerState::forLoop:
-                fileContent.get(c);
-                if (c == 'o') {
-                    fileContent.get(c);
-                    if (c == 'r') {
-                        // push for loop
-                    } else {
-                        state = LexerState::Error;
-                    }
-                } else {
-                    state = LexerState::Error;
-                }
-                break;
-
-            case LexerState::Variable:
-                fileContent.get(c);
-                if (c == 'e') {
-                    fileContent.get(c);
-                    if (c == 't') {
-                        push_operator_token(TOKEN::TOKEN_CONCEPTS::VARIABLE);
-                        state = LexerState::Start;
-                    } else {
-                        state = LexerState::Error;
-                    }
-                } else {
-                    state = LexerState::Error;
-                }
-                break;
-
-            case LexerState::While:
-                fileContent.get(c);
-                if (c == 'w') {
-                    fileContent.get(c);
-                    if (c == 'h') {
-                        fileContent.get(c);
-                        if (c == 'i') {
-                            fileContent.get(c);
-                            if (c == 'l') {
-                                fileContent.get(c);
-                                if (c == 'e') {
-                                    // push while loop
-                                    state = LexerState::Start;
-                                } else {
-                                    state = LexerState::Error;
-                                }
-                            } else {
-                                state = LexerState::Error;
-                            }
-                        } else {
-                            state = LexerState::Error;
-                        }
-                    } else {
-                        state = LexerState::Error;
-                    }
-                } else {
-                    state = LexerState::Error;
-                }
-                break;
-
-            case LexerState::Error:
-                throw std::runtime_error("Unexpected character sequence");
+    switch (state) {
+    case LexerState::VariableName:
+        std::cout << "Processing variable name" << std::endl;
+        
+        if (buffer.empty()) {
+            throw std::runtime_error("Unexpected empty variable name");
         }
 
-         if (fileContent.good()) {
-            fileContent.get(c);
-        } else {
-            std::cout << "here" << std::endl;
-            break; 
+        varToken.concept = TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME;
+        varToken.variableName = buffer;
+        result.push_back(varToken);
+        buffer.clear();
+
+        if (c == '=') {
+            std::cout << "Processing assignment operator" << std::endl;
+            TOKEN assignToken;
+            assignToken.op = TOKEN::OPERATORS::EQUALS_OPERATOR;
+            result.push_back(assignToken);
+            processAssignment(fileContent,result);
+        } else if(check_if_operator(c))
+        {
+            processOperator(c,fileContent,result);
         }
+        break;
+    
+    default:
+        break;
     }
 }
+
+
+
+
 
 
 void Lexer::processVariable(std::ifstream &fileContent, std::vector<TOKEN> &result) {

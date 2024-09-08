@@ -38,6 +38,7 @@ struct TOKEN
         LESS_THAN_EQUAL_OPERATOR,
         NOT_EQUALS_OPERATOR,
         NEWLINE_OPERATOR,
+        SEQUENCE_OPERATOR
     };
 
     
