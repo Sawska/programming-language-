@@ -13,9 +13,10 @@ public:
     SymbolTable(SymbolTable&&) = default;
     SymbolTable& operator=(SymbolTable&&) = default;
 
-    std::map<std::string, ASTNodePtr> table;
+        std::unordered_map<std::string, ASTNodePtr> table;
 
-    ASTNodePtr getVariableValue(const std::string& name) const;
+    
+    ASTNodePtr& getVariableValue(const std::string& name);
     void setVariableValue(const std::string& name, ASTNodePtr value);
     void listVariables() const;
 };

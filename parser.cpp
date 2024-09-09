@@ -5,24 +5,19 @@ ASTNodePtr Parser::parse() {
 
     std::cout << "Starting of parsing" << std::endl;
 
-    
     while (index < tokens.size()) {
         ASTNodePtr line = parseLogicalExpression();
 
-        
         if (!root) {
             root = std::move(line);
         } else {
-            
             root = AST::makeSequenceNode(std::move(root), std::move(line));
         }
 
-    
         if (index < tokens.size() && tokens[index].op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
             index++;
         }
     }
-
 
     if (index < tokens.size()) {
         throw std::runtime_error("Unexpected tokens after parsing");
@@ -31,9 +26,6 @@ ASTNodePtr Parser::parse() {
     std::cout << "End of parsing" << std::endl;
     return root;
 }
-
-
-
 
 ASTNodePtr Parser::parseExpression() {
     auto left = parseTerm();
@@ -53,9 +45,7 @@ ASTNodePtr Parser::parseExpression() {
             index++;
             auto right = parseTerm();
             left = AST::makeBinaryOperationNode(token.op, std::move(left), std::move(right));
-        } 
-        
-        else if (token.op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
+        } else if (token.op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
             index++;
             break;
         } else {
@@ -83,9 +73,7 @@ ASTNodePtr Parser::parseLogicalExpression() {
             index++;
             auto right = parseExpression();
             left = AST::makeBinaryOperationNode(token.op, std::move(left), std::move(right));
-        }
-        
-        else if (token.op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
+        } else if (token.op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
             index++;
             break;
         } else {
@@ -108,9 +96,7 @@ ASTNodePtr Parser::parseTerm() {
             index++;
             auto right = parseFactor();
             left = AST::makeBinaryOperationNode(token.op, std::move(left), std::move(right));
-        } 
-        
-        else if (token.op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
+        } else if (token.op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
             index++;
             break;
         } else {
@@ -131,46 +117,39 @@ ASTNodePtr Parser::parseFactor() {
     if (token.concept == TOKEN::TOKEN_CONCEPTS::NUMBER) {
         index++;
         return AST::makeNumberNode(token.number);
-    }
-    
-    else if (token.concept == TOKEN::TOKEN_CONCEPTS::STRING) {
+    } else if (token.concept == TOKEN::TOKEN_CONCEPTS::STRING) {
         index++;
         return AST::makeStringNode(token.string);
-    }
-    
-    else if (token.concept == TOKEN::TOKEN_CONCEPTS::OPEN_BRACKETS) {
+    } else if (token.concept == TOKEN::TOKEN_CONCEPTS::OPEN_CIRCLE_BRACKETS) {
         index++;
         auto expr = parseExpression();
 
-        if (index >= tokens.size() || tokens[index].concept != TOKEN::TOKEN_CONCEPTS::CLOSE_BRACKETS) {
+        if (index >= tokens.size() || tokens[index].concept != TOKEN::TOKEN_CONCEPTS::CLOSE_CIRCLE_BRACKETS) {
             throw std::runtime_error("Mismatched parentheses");
         }
         index++;
         return expr;
-    }
-    
-    else if (token.op == TOKEN::OPERATORS::NOT_OPERATOR ||
-             token.op == TOKEN::OPERATORS::INCREMENT_OPERATOR ||
-             token.op == TOKEN::OPERATORS::DECREMENT_OPERATOR ||
-             token.op == TOKEN::OPERATORS::BIT_NOT_OPERATOR) {
+    } else if (token.concept == TOKEN::TOKEN_CONCEPTS::OPEN_BRACKETS) {
+        return parseBlock();
+    } else if (token.op == TOKEN::OPERATORS::NOT_OPERATOR ||
+               token.op == TOKEN::OPERATORS::INCREMENT_OPERATOR ||
+               token.op == TOKEN::OPERATORS::DECREMENT_OPERATOR ||
+               token.op == TOKEN::OPERATORS::BIT_NOT_OPERATOR) {
         index++;
         auto operand = parseFactor();
         if (!operand) throw std::runtime_error("Invalid operand for unary operation");
         return AST::makeUnaryOperationNode(token.op, std::move(operand));
-    } 
-    
-    else if (token.concept == TOKEN::TOKEN_CONCEPTS::VARIABLE) {
+    } else if (token.concept == TOKEN::TOKEN_CONCEPTS::VARIABLE) {
         index++;
         return parseVariableOrAssignment();
     } else if (token.concept == TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME) {
         return handleVariableReference();
-    }
-    
-    else {
+    } else {
         std::cerr << "Unexpected token: " << token.op << " at index: " << index << std::endl;
         throw std::runtime_error("Unexpected token: " + std::to_string(token.op));
     }
 }
+
 
 ASTNodePtr Parser::parseVariableOrAssignment() {
     if (index >= tokens.size() || tokens[index].concept != TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME) {
@@ -178,48 +157,118 @@ ASTNodePtr Parser::parseVariableOrAssignment() {
         throw std::runtime_error("Expected variable name");
     }
 
+
+    SymbolTable& currentTable = *symbolTableStack.top();
+
     const TOKEN& token = tokens[index];
     std::string varName = token.variableName;
     index++;
 
-    
     if (index < tokens.size() && tokens[index].op == TOKEN::OPERATORS::EQUALS_OPERATOR) {
-        index++; 
-        auto expr = parseExpression(); 
+        index++;
+        auto expr = parseExpression();
 
-        
         if (index < tokens.size() && tokens[index].op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
             index++;
         }
-        table.setVariableValue(varName, std::move(expr));
-
+        currentTable.setVariableValue(varName, std::move(expr));
         return AST::makeEmptyNode();
     }
 
-    
     return handleVariableReference();
 }
+
+
+ASTNodePtr Parser::parseBlock() {
+    auto block_node = std::make_unique<BlockNode>();
+    SymbolTable newTable;  
+    symbolTableStack.push(std::make_unique<SymbolTable>(std::move(newTable)));
+
+    while (index < tokens.size() && tokens[index].concept != TOKEN::TOKEN_CONCEPTS::CLOSE_BRACKETS) {
+        auto statement = parseStatement();
+        if (statement) {
+            block_node->addStatement(std::move(statement));
+        }
+    }
+
+    if (index < tokens.size() && tokens[index].concept == TOKEN::TOKEN_CONCEPTS::CLOSE_BRACKETS) {
+        index++;
+    } else {
+        throw std::runtime_error("Mismatched or missing closing bracket");
+    }
+
+    symbolTableStack.pop();
+
+    return block_node;
+}
+
 
 
 ASTNodePtr Parser::handleVariableReference() {
     if (index >= tokens.size()) {
         throw std::runtime_error("Unexpected end of tokens");
     }
-    table.listVariables();
+
+
+    SymbolTable& currentTable = *symbolTableStack.top();
+
     const TOKEN& token = tokens[index];
     if (token.concept != TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME) {
         throw std::runtime_error("Expected variable name");
     }
 
     std::string varName = token.variableName;
-    index++; 
+    index++;
 
+    if (index < tokens.size() && tokens[index].op == TOKEN::OPERATORS::EQUALS_OPERATOR) {
+        index++;
+        auto expr = parseExpression();
+
+        if (index < tokens.size() && tokens[index].op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
+            index++;
+        }
+        currentTable.setVariableValue(varName, std::move(expr));
+        return AST::makeEmptyNode();        
+    }
+
+    ASTNodePtr variableNode =  std::move(currentTable.getVariableValue(varName));
     
-    ASTNodePtr variableNode = table.getVariableValue(varName);
     if (!variableNode) {
         std::cerr << "Undefined variable: " << varName << std::endl;
         throw std::runtime_error("Undefined variable: " + varName);
     }
 
     return variableNode; 
+}
+
+
+ASTNodePtr Parser::parseStatement() {
+    if (index >= tokens.size()) {
+        throw std::runtime_error("Unexpected end of tokens");
+    }
+
+    const TOKEN& token = tokens[index];
+
+    if (token.concept == TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME) {
+
+        return parseVariableOrAssignment();
+    } else if (token.concept == TOKEN::TOKEN_CONCEPTS::OPEN_CIRCLE_BRACKETS) {
+        
+        return parseExpression();
+    } else if (token.concept == TOKEN::TOKEN_CONCEPTS::OPEN_BRACKETS) {
+        
+        return parseBlock();
+    } else if (token.concept == TOKEN::TOKEN_CONCEPTS::IF) {
+
+        return parseIf();
+    } else if (token.concept == TOKEN::TOKEN_CONCEPTS::WHILE) {
+
+        return parseWhile();
+    } else if (token.concept == TOKEN::TOKEN_CONCEPTS::RETURN) {
+
+        return parseReturn();
+    } else {
+        std::cerr << "Unexpected token: " << token.variableName << " at index: " << index << std::endl;
+        throw std::runtime_error("Unexpected token: " + std::to_string(token.concept));
+    }
 }

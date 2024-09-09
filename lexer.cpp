@@ -253,11 +253,11 @@ void Lexer::processOperator(char c, std::ifstream &fileContent, std::vector<TOKE
             push_operator_token(tok, TOKEN::OPERATORS::QUESTION_OPERATOR);
             break;
         case '(':
-            tok.concept = TOKEN::TOKEN_CONCEPTS::OPEN_BRACKETS;
+            tok.concept = TOKEN::TOKEN_CONCEPTS::OPEN_CIRCLE_BRACKETS;
             result.push_back(tok);
             break;
         case ')':
-            tok.concept = TOKEN::TOKEN_CONCEPTS::CLOSE_BRACKETS;
+            tok.concept = TOKEN::TOKEN_CONCEPTS::CLOSE_CIRCLE_BRACKETS;
             result.push_back(tok);
             break;
         default:
@@ -270,12 +270,16 @@ bool Lexer::check_if_char(char c) {
 }
 
 void Lexer::processChar(char c, std::ifstream &fileContent, std::vector<TOKEN> &result) {
-    std::cout << "starting processing chars" << std::endl;
-    TOKEN tok;
-    TOKEN varToken;
+    std::cout << "Starting processing chars" << std::endl;
     LexerState state = LexerState::Start;
 
-    auto push_operator_token = [&result](TOKEN::TOKEN_CONCEPTS concept) {
+    auto push_operator_token = [&result](TOKEN::OPERATORS op) {
+        TOKEN tok;
+        tok.op = op;
+        result.push_back(tok);
+    };
+
+    auto push_concept_token = [&result](TOKEN::TOKEN_CONCEPTS concept) {
         TOKEN tok;
         tok.concept = concept;
         result.push_back(tok);
@@ -284,54 +288,115 @@ void Lexer::processChar(char c, std::ifstream &fileContent, std::vector<TOKEN> &
     std::string buffer;
     buffer.push_back(c);
 
-   
-     while (fileContent.get(c) && (std::isalnum(c) || c == '_')) {
+    
+    while (fileContent.get(c) && (std::isalnum(c) || c == '_')) {
         buffer.push_back(c);
     }
 
-    // Handle known keywords
+    
     if (buffer == "let") {
         state = LexerState::Start;
         buffer.clear();
         processVariable(fileContent, result);
         return;
-    } else if (buffer == "function" || buffer == "for" || buffer == "while" || 
-               buffer == "if" || buffer == "else" || buffer == "class" || 
-               buffer == "break" || buffer == "continue" || buffer == "return") {
-        // Add handling logic for each keyword if necessary
+    } else if (buffer == "return") {
+        while (fileContent.get(c)) {
+            if (std::isspace(c)) continue;
+
+            TOKEN tok;
+            if (check_if_number(c)) {
+                std::string number(1, c);
+                while (fileContent.get(c) && check_if_number(c)) {
+                    number.push_back(c);
+                }
+
+                tok.concept = TOKEN::TOKEN_CONCEPTS::NUMBER;
+                tok.number = std::stoi(number);
+                result.push_back(tok);
+
+                if (!fileContent) {
+                    std::cerr << "Error: Unable to unget character after number" << std::endl;
+                    break;
+                }
+
+                fileContent.unget();
+            } else if (check_if_operator(c)) {
+                processOperator(c, fileContent, result);
+                if (!fileContent) break;
+            } else if (check_if_char(c)) {
+                processChar(c, fileContent, result);
+                if (!fileContent) break;
+            } else if (c == '\'' || c == '"') {
+                processString(c, fileContent, result);
+                if (!fileContent) break;
+            } else {
+                std::cerr << "Unexpected character encountered: " << c << std::endl;
+            }
+
+            if (fileContent.eof()) {
+                std::cout << "End of file reached" << std::endl;
+                break;
+            } else if (fileContent.fail()) {
+                std::cerr << "Error reading the file" << std::endl;
+                break;
+            }
+        }
+        return;
+    } else if (buffer == "function" || buffer == "for" || buffer == "while" || buffer == "if" || buffer == "else" || buffer == "class") {
+    
+        return;
+    } else if (buffer == "break") {
+        TOKEN tok;
+        push_concept_token(TOKEN::TOKEN_CONCEPTS::BREAK);
+
+        if (fileContent.get(c) && c == '\n') {
+            push_operator_token(TOKEN::OPERATORS::NEWLINE_OPERATOR);
+        } else {
+            throw std::runtime_error("Can't have something after 'break'");
+        }
+        return;
+    } else if (buffer == "continue") {
+        TOKEN tok;
+        push_concept_token(TOKEN::TOKEN_CONCEPTS::CONTINUE);
+
+        if (fileContent.get(c) && c == '\n') {
+            push_operator_token(TOKEN::OPERATORS::NEWLINE_OPERATOR);
+        } else {
+            throw std::runtime_error("Can't have something after 'continue'");
+        }
+        return;
     } else {
         state = LexerState::VariableName;
     }
 
-    switch (state) {
-    case LexerState::VariableName:
+    
+    if (state == LexerState::VariableName) {
         std::cout << "Processing variable name" << std::endl;
         
         if (buffer.empty()) {
             throw std::runtime_error("Unexpected empty variable name");
         }
 
+        TOKEN varToken;
         varToken.concept = TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME;
         varToken.variableName = buffer;
         result.push_back(varToken);
         buffer.clear();
 
-        if (c == '=') {
+        if (fileContent.get(c) && c == '=') {
             std::cout << "Processing assignment operator" << std::endl;
             TOKEN assignToken;
             assignToken.op = TOKEN::OPERATORS::EQUALS_OPERATOR;
             result.push_back(assignToken);
-            processAssignment(fileContent,result);
-        } else if(check_if_operator(c))
-        {
-            processOperator(c,fileContent,result);
+            processAssignment(fileContent, result);
+        } else if (check_if_operator(c)) {
+            processOperator(c, fileContent, result);
+        } else {
+            fileContent.unget();
         }
-        break;
-    
-    default:
-        break;
     }
 }
+
 
 
 

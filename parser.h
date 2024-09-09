@@ -7,6 +7,7 @@
 #include "token.h"
 #include "AST.h"
 #include "SymbolTable.h"
+#include <stack>
 
 class Parser {
 public:
@@ -15,7 +16,9 @@ public:
     
     
     Parser(const std::vector<TOKEN>& tokens, SymbolTable&& table)
-        : tokens(tokens), index(0), table(std::move(table)) {}
+        : tokens(tokens), index(0)  {
+            symbolTableStack.push(std::make_unique<SymbolTable>(std::move(table)));
+        }
 
     ASTNodePtr parse();
     ASTNodePtr parseExpression();
@@ -24,7 +27,13 @@ public:
     ASTNodePtr parseLogicalExpression();
     ASTNodePtr parseVariableOrAssignment();
     ASTNodePtr handleVariableReference();
-    SymbolTable table;
+    ASTNodePtr parseBlock();
+    ASTNodePtr parseStatement();
+    ASTNodePtr parseIf();
+    ASTNodePtr parseWhile();
+    ASTNodePtr parseReturn();
+    std::stack<std::unique_ptr<SymbolTable>> symbolTableStack;
+
 
 private:
     std::vector<TOKEN> tokens;

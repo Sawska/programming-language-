@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include "token.h"
+#include "SymbolTable.h"
 
 class AST;
 
@@ -20,6 +21,7 @@ public:
         VariableExpression,
         String,
         Unknown,
+        Block,
         Empty
     };
 
@@ -118,6 +120,39 @@ public:
         return std::make_unique<EmptyNode>();
     }
 };
+
+class BlockNode : public AST {
+public:
+    BlockNode() : AST(Type::Block), symbol_table(std::make_unique<SymbolTable>()) {}
+
+    std::unique_ptr<AST> clone() const override {
+        auto cloned_node = std::make_unique<BlockNode>();
+  
+        cloned_node->symbol_table = std::make_unique<SymbolTable>(*symbol_table);
+  
+        for (const auto& stmt : statements) {
+            cloned_node->statements.push_back(stmt->clone());
+        }
+        return cloned_node;
+    }
+
+    SymbolTable* getSymbolTable() const {
+        return symbol_table.get();
+    }
+
+    void addStatement(ASTNodePtr stmt) {
+        statements.push_back(std::move(stmt));
+    }
+
+    const std::vector<ASTNodePtr>& getStatements() const {
+        return statements;
+    }
+
+private:
+    std::unique_ptr<SymbolTable> symbol_table;
+    std::vector<ASTNodePtr> statements; 
+};
+
 
 
 

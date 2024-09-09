@@ -48,12 +48,19 @@ struct TOKEN
         VARIABLE,
         VARIABLE_NAME,
         OPEN_SQUARE_BRACKETS,
+        CLOSE_CIRCLE_BRACKETS,
+        OPEN_CIRCLE_BRACKETS,
         CLOSE_SQUARE_BRACKETS,
         OPEN_BRACKETS,
         CLOSE_BRACKETS,
         ERROR_TOKEN,
         EXPRESSION,
         BLOCK,
+        BREAK,
+        CONTINUE,
+        RETURN,
+        IF,
+        WHILE
     };
 
 
