@@ -12,7 +12,7 @@ public:
     Compiler(Lexer& lex) 
         : lexer(lex), 
           parser(lexer.read_file(), std::move(lexer.table)), 
-          table(std::move(parser.table)) 
+          symbolTableStack(std::move(parser.symbolTableStack)) 
     {
         root = parser.parse();
     }
@@ -25,7 +25,7 @@ private:
     Parser parser;
     ASTNodePtr root;
     void REPL();
-    SymbolTable table;
+    std::stack<std::unique_ptr<SymbolTable>> symbolTableStack;
 };
 
 #endif // COMPILER_H

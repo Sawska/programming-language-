@@ -12,7 +12,13 @@ add_executable(PROGRAMMING_LANGUAGE
     token.h
     compiler.cpp
     SymbolTable.cpp   
-    
+    StringNode.cpp
+    NumberNode.cpp
+    EmptyNode.cpp
+    VariableNode.cpp
+    UnaryOperationNode.cpp
+    BinaryOperationNode.cpp
+    BlockNode.cpp
 )
 
 

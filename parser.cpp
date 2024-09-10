@@ -272,3 +272,18 @@ ASTNodePtr Parser::parseStatement() {
         throw std::runtime_error("Unexpected token: " + std::to_string(token.concept));
     }
 }
+
+ASTNodePtr Parser::parseIf()
+{
+    return ASTNodePtr();
+}
+
+ASTNodePtr Parser::parseWhile()
+{
+    return ASTNodePtr();
+}
+
+ASTNodePtr Parser::parseReturn()
+{
+    return ASTNodePtr();
+}

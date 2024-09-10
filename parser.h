@@ -8,6 +8,13 @@
 #include "AST.h"
 #include "SymbolTable.h"
 #include <stack>
+#include "StringNode.h"
+#include "NumberNode.h"
+#include "EmptyNode.h"
+#include "VariableNode.h"
+#include "UnaryOperationNode.h"
+#include "BinaryOperationNode.h"
+#include "BlockNode.h"
 
 class Parser {
 public:

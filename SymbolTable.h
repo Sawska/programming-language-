@@ -1,24 +1,29 @@
 #ifndef SYMBOL_TABLE_H
 #define SYMBOL_TABLE_H
 
-#include <map>
+#include <unordered_map>
 #include <string>
-#include "token.h"
-#include <iostream>
+#include <memory>
 #include "AST.h"
 
 class SymbolTable {
 public:
     SymbolTable() = default;
-    SymbolTable(SymbolTable&&) = default;
-    SymbolTable& operator=(SymbolTable&&) = default;
+    SymbolTable(SymbolTable&&) noexcept = default;
+    SymbolTable& operator=(SymbolTable&&) noexcept = default;
+    SymbolTable(const SymbolTable&) = delete;
+    SymbolTable& operator=(const SymbolTable&) = delete;
 
-        std::unordered_map<std::string, ASTNodePtr> table;
-
-    
-    ASTNodePtr& getVariableValue(const std::string& name);
-    void setVariableValue(const std::string& name, ASTNodePtr value);
+    std::unique_ptr<AST>& getVariableValue(const std::string& name);
+    void setVariableValue(const std::string& name, std::unique_ptr<AST> value);
     void listVariables() const;
+
+    SymbolTable clone() const;
+
+    std::unordered_map<std::string, std::unique_ptr<AST>> deepCopyTable() const;
+
+    std::unordered_map<std::string, std::unique_ptr<AST>> table;
+private:
 };
 
-#endif //SYMBOL_TABLE_H
+#endif // SYMBOL_TABLE_H
