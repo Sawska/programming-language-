@@ -47,7 +47,6 @@ std::vector<TOKEN> Lexer::read_file() {
             }
         }
         else if (check_if_char(c)) {
-            std::cout << "here6" << std::endl;
             processChar(c, fileContent, result);
             if(!fileContent)
             {
@@ -174,12 +173,16 @@ void Lexer::processOperator(char c, std::ifstream &fileContent, std::vector<TOKE
             break;
         case '{':
             push_concept_token(tok,TOKEN::TOKEN_CONCEPTS::OPEN_BRACKETS);
+            break;
         case '}':
             push_concept_token(tok,TOKEN::TOKEN_CONCEPTS::CLOSE_BRACKETS);
+            break;
         case '[':
             push_concept_token(tok,TOKEN::TOKEN_CONCEPTS::OPEN_SQUARE_BRACKETS);
+            break;
         case ']':
             push_concept_token(tok,TOKEN::TOKEN_CONCEPTS::CLOSE_SQUARE_BRACKETS);
+            break;
         case '/':
             fileContent.get(c);
             if (c == '/') {

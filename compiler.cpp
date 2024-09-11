@@ -35,8 +35,27 @@ std::variant<double, std::string> Compiler::evaluateAST(const ASTNodePtr& node) 
         case AST::Type::String:
             return node->stringValue;
 
-        case AST::Type::Empty: 
+        case AST::Type::Empty:
              return {};
+        
+        case AST::Type::Block: {
+        auto blockNode = dynamic_cast<BlockNode*>(node.get());
+        if (!blockNode) throw std::runtime_error("Invalid block node");
+        symbolTableStack.push(std::move(blockNode->symbol_table));
+    
+        for (const ASTNodePtr& statement : blockNode->statements) {
+            if(statement->type == AST::Type::Empty)
+            {
+                continue;
+            }
+            
+                 return evaluateAST(statement);
+        }
+    
+        symbolTableStack.pop();
+}
+
+
 
         case AST::Type::BinaryOperation: {
            
@@ -135,10 +154,11 @@ std::variant<double, std::string> Compiler::evaluateAST(const ASTNodePtr& node) 
             return evaluateAST(node->left);
 
         case AST::Type::Variable: {
-            auto varNode = dynamic_cast<VariableNode*>(node.get());
-            if (!varNode) throw std::runtime_error("Invalid variable node");
-            return evaluateAST(varNode->value);
-        }
+    auto varNode = dynamic_cast<VariableNode*>(node.get());
+    if (!varNode) throw std::runtime_error("Invalid variable node");
+    return evaluateAST(varNode->value);
+}
+
 
         default:
             throw std::runtime_error("Unknown AST node type");

@@ -2,17 +2,16 @@
 #include "AST.h"
 #include <iostream>
 
-std::unique_ptr<AST>& SymbolTable::getVariableValue(const std::string& name) {
+std::unique_ptr<AST> SymbolTable::getVariableValue(const std::string& name) {
     auto it = table.find(name);
     if (it != table.end()) {
-        return it->second;
+        return it->second->clone();
     }
 
     std::cerr << "Variable not found: " << name << std::endl;
-    
-    static std::unique_ptr<AST> empty_node = nullptr;
-    return empty_node;
+    return nullptr;
 }
+
 
 void SymbolTable::setVariableValue(const std::string& name, std::unique_ptr<AST> value) {
     table[name] = std::move(value);

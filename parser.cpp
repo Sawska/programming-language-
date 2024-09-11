@@ -2,7 +2,7 @@
 
 ASTNodePtr Parser::parse() {
     ASTNodePtr root = nullptr;
-
+    symbolTableStack.push(std::make_unique<SymbolTable>());
     std::cout << "Starting of parsing" << std::endl;
 
     while (index < tokens.size()) {
@@ -180,10 +180,13 @@ ASTNodePtr Parser::parseVariableOrAssignment() {
 
 
 ASTNodePtr Parser::parseBlock() {
+    index++;
     auto block_node = std::make_unique<BlockNode>();
-    SymbolTable newTable;  
-    symbolTableStack.push(std::make_unique<SymbolTable>(std::move(newTable)));
 
+    
+    symbolTableStack.push(std::make_unique<SymbolTable>());
+
+    
     while (index < tokens.size() && tokens[index].concept != TOKEN::TOKEN_CONCEPTS::CLOSE_BRACKETS) {
         auto statement = parseStatement();
         if (statement) {
@@ -191,11 +194,16 @@ ASTNodePtr Parser::parseBlock() {
         }
     }
 
+    
     if (index < tokens.size() && tokens[index].concept == TOKEN::TOKEN_CONCEPTS::CLOSE_BRACKETS) {
         index++;
     } else {
         throw std::runtime_error("Mismatched or missing closing bracket");
     }
+
+
+    block_node->symbol_table = std::move(symbolTableStack.top());
+
 
     symbolTableStack.pop();
 
@@ -204,21 +212,22 @@ ASTNodePtr Parser::parseBlock() {
 
 
 
+
 ASTNodePtr Parser::handleVariableReference() {
     if (index >= tokens.size()) {
         throw std::runtime_error("Unexpected end of tokens");
     }
 
-
     SymbolTable& currentTable = *symbolTableStack.top();
-
     const TOKEN& token = tokens[index];
+
     if (token.concept != TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME) {
         throw std::runtime_error("Expected variable name");
     }
 
     std::string varName = token.variableName;
     index++;
+
 
     if (index < tokens.size() && tokens[index].op == TOKEN::OPERATORS::EQUALS_OPERATOR) {
         index++;
@@ -231,15 +240,18 @@ ASTNodePtr Parser::handleVariableReference() {
         return AST::makeEmptyNode();        
     }
 
-    ASTNodePtr variableNode =  std::move(currentTable.getVariableValue(varName));
-    
-    if (!variableNode) {
+
+    ASTNodePtr variableValueNode = currentTable.getVariableValue(varName);
+
+    if (!variableValueNode) {
         std::cerr << "Undefined variable: " << varName << std::endl;
         throw std::runtime_error("Undefined variable: " + varName);
     }
 
-    return variableNode; 
+
+    return std::make_unique<VariableNode>(varName, std::move(variableValueNode));
 }
+
 
 
 ASTNodePtr Parser::parseStatement() {
@@ -251,8 +263,13 @@ ASTNodePtr Parser::parseStatement() {
 
     if (token.concept == TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME) {
 
+        return handleVariableReference();
+    }  else if(token.concept == TOKEN::TOKEN_CONCEPTS::VARIABLE)
+    {
+        index++;
         return parseVariableOrAssignment();
-    } else if (token.concept == TOKEN::TOKEN_CONCEPTS::OPEN_CIRCLE_BRACKETS) {
+    }
+    else if (token.concept == TOKEN::TOKEN_CONCEPTS::OPEN_CIRCLE_BRACKETS) {
         
         return parseExpression();
     } else if (token.concept == TOKEN::TOKEN_CONCEPTS::OPEN_BRACKETS) {

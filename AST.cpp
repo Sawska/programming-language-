@@ -5,6 +5,7 @@
 #include "UnaryOperationNode.h"
 #include "StringNode.h"
 #include "EmptyNode.h"
+#include "VariableNode.h"
 
 AST::AST(Type type) : type(type), value(0), op(TOKEN::OPERATORS::UNKNOWN), left(nullptr), right(nullptr) {}
 
@@ -30,5 +31,10 @@ ASTNodePtr AST::makeEmptyNode() {
 
 ASTNodePtr AST::makeSequenceNode(ASTNodePtr left, ASTNodePtr right) {
     return std::make_unique<BinaryOperationNode>(TOKEN::OPERATORS::SEQUENCE_OPERATOR, std::move(left), std::move(right));
+
 }
 
+ASTNodePtr AST::makeVariableNode(const std::string &name, ASTNodePtr value)
+{
+     return std::make_unique<VariableNode>(name, std::move(value));
+}

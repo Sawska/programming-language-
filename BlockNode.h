@@ -16,9 +16,9 @@ public:
     void addStatement(ASTNodePtr stmt);
     const std::vector<ASTNodePtr>& getStatements() const;
 
-private:
     std::unique_ptr<SymbolTable> symbol_table;
     std::vector<ASTNodePtr> statements;
+private:
 };
 
 #endif //BLOCKNODE_H

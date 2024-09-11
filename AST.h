@@ -45,6 +45,7 @@ public:
     static ASTNodePtr makeStringNode(const std::string& value);
     static ASTNodePtr makeEmptyNode();
     static ASTNodePtr makeSequenceNode(ASTNodePtr left, ASTNodePtr right);
+    static ASTNodePtr makeVariableNode(const std::string& name, ASTNodePtr value);
 };
 
 

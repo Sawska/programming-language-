@@ -14,7 +14,7 @@ public:
     SymbolTable(const SymbolTable&) = delete;
     SymbolTable& operator=(const SymbolTable&) = delete;
 
-    std::unique_ptr<AST>& getVariableValue(const std::string& name);
+    std::unique_ptr<AST> getVariableValue(const std::string& name);
     void setVariableValue(const std::string& name, std::unique_ptr<AST> value);
     void listVariables() const;
 
