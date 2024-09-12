@@ -22,7 +22,8 @@ public:
         String,
         Unknown,
         Block,
-        Empty
+        Empty,
+        Return
     };
 
     Type type;

@@ -60,7 +60,8 @@ struct TOKEN
         CONTINUE,
         RETURN,
         IF,
-        WHILE
+        WHILE,
+        ELSE,
     };
 
 

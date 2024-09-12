@@ -29,31 +29,52 @@ std::variant<double, std::string> Compiler::evaluateAST(const ASTNodePtr& node) 
     if (!node) throw std::runtime_error("Null AST node");
 
     switch (node->type) {
-        case AST::Type::Number:
-            return node->value;
+        case AST::Type::Number: {
+            auto nd = dynamic_cast<NumberNode*>(node.get());
+            return nd->value;
+        }
+            
 
-        case AST::Type::String:
-            return node->stringValue;
+        case AST::Type::String: {
+            auto nd = dynamic_cast<StringNode*>(node.get());
+            return nd->stringValue;
+        }
+        
 
         case AST::Type::Empty:
              return {};
         
         case AST::Type::Block: {
-        auto blockNode = dynamic_cast<BlockNode*>(node.get());
-        if (!blockNode) throw std::runtime_error("Invalid block node");
-        symbolTableStack.push(std::move(blockNode->symbol_table));
+    auto blockNode = dynamic_cast<BlockNode*>(node.get());
+    if (!blockNode) throw std::runtime_error("Invalid block node");
     
-        for (const ASTNodePtr& statement : blockNode->statements) {
-            if(statement->type == AST::Type::Empty)
-            {
-                continue;
-            }
-            
-                 return evaluateAST(statement);
+    symbolTableStack.push(std::move(blockNode->symbol_table));
+
+    for (const ASTNodePtr& statement : blockNode->statements) {
+        if (statement->type == AST::Type::Empty) {
+            continue;
         }
-    
-        symbolTableStack.pop();
+        
+        auto result = evaluateAST(statement);
+
+
+        if (statement->type == AST::Type::Return) {
+            symbolTableStack.pop(); 
+            return result;  
+        }
+    }
+
+    symbolTableStack.pop();
+    return {};  
 }
+
+
+    case AST::Type::Return: {
+        auto returnNode = dynamic_cast<ReturnNode*>(node.get());
+
+        if (!returnNode) throw std::runtime_error("Invalid return node");
+        return evaluateAST(returnNode->value);
+    }
 
 
 

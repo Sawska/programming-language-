@@ -6,6 +6,7 @@
 #include "StringNode.h"
 #include "EmptyNode.h"
 #include "VariableNode.h"
+#include "ReturnNode.h"
 
 AST::AST(Type type) : type(type), value(0), op(TOKEN::OPERATORS::UNKNOWN), left(nullptr), right(nullptr) {}
 

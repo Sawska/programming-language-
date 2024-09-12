@@ -302,5 +302,11 @@ ASTNodePtr Parser::parseWhile()
 
 ASTNodePtr Parser::parseReturn()
 {
-    return ASTNodePtr();
+    index++;
+        auto expr = parseExpression();
+
+        if (index < tokens.size() && tokens[index].op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
+            index++;
+        }
+        return std::make_unique<ReturnNode>(std::move(expr));
 }
