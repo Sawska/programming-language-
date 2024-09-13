@@ -20,6 +20,8 @@ add_executable(PROGRAMMING_LANGUAGE
     BinaryOperationNode.cpp
     BlockNode.cpp   
     ReturnNode.cpp
+    ifNode.cpp
+    WhileNode.cpp
 )
 
 

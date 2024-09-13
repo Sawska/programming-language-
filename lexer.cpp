@@ -111,6 +111,8 @@ bool Lexer::check_if_operator(char c) {
         case '}':
         case '[':
         case ']':
+        case '(':
+        case ')':
             return true;
         default:
             return false;
@@ -304,53 +306,7 @@ void Lexer::processChar(char c, std::ifstream &fileContent, std::vector<TOKEN> &
         return;
     } 
     else if (buffer == "return") {
-    bool expressionParsed = false;
-    std::string number;
-    TOKEN tok;
-
-    
-    while (fileContent.get(c) && std::isspace(c)) {
-        continue;
-    }
-
-    
-    if (check_if_number(c)) {
-        number.push_back(c);
-        while (fileContent.get(c) && check_if_number(c)) {
-            number.push_back(c);
-        }
-        tok.concept = TOKEN::TOKEN_CONCEPTS::NUMBER;
-        tok.number = std::stoi(number);
-        result.push_back(tok);
-        expressionParsed = true;
-    } else if (check_if_operator(c)) {
-        processOperator(c, fileContent, result);
-        expressionParsed = true;
-    } else if (check_if_char(c)) {
-        processChar(c, fileContent, result);
-        expressionParsed = true;
-    } else if (c == '\'' || c == '"') {
-        processString(c, fileContent, result);
-        expressionParsed = true;
-    } else {
-        std::cerr << "Unexpected character encountered after 'return': " << c << std::endl; 
-        result.pop_back();
-        return;
-    }
-
-    
-    while (fileContent.get(c) && c != '\n') {
-        if (!std::isspace(c)) {
-            std::cerr << "Error: Only one token or expression allowed after 'return'" << std::endl;
-            return;
-        }
-    }
-
-    if (!expressionParsed) {
-        std::cerr << "Error: No valid expression found after 'return'" << std::endl;
-    }
-
-    fileContent.unget(); 
+    push_concept_token(TOKEN::TOKEN_CONCEPTS::RETURN);
     return;
 
     } else if (buffer == "function") {
@@ -359,148 +315,13 @@ void Lexer::processChar(char c, std::ifstream &fileContent, std::vector<TOKEN> &
     } else if(buffer == "for")  {
 
     } else if(buffer == "while") {
-        
+    push_concept_token(TOKEN::TOKEN_CONCEPTS::WHILE);    
     } else if (buffer == "if") {
-    TOKEN tok;
     push_concept_token(TOKEN::TOKEN_CONCEPTS::IF);
-
-    
-    while (fileContent.get(c) && c != '(') {
-    
-        if (!fileContent) {
-            std::cerr << "Error: Unexpected end of file while searching for '(' after 'if'" << std::endl;
-            return;
-        }
-    }
-
-    if (c != '(') {
-        std::cerr << "Error: Expected '(' after 'if'" << std::endl;
-        return;
-    }
-    push_concept_token(TOKEN::TOKEN_CONCEPTS::OPEN_BRACKETS);
-
-    
-    std::string number;
-    bool expressionParsed = false;
-    while (fileContent.get(c) && c != ')') {
-        if (std::isspace(c)) {
-            continue;
-        }
-
-        if (check_if_number(c)) {
-            number.push_back(c);
-            while (fileContent.get(c) && check_if_number(c)) {
-                number.push_back(c);
-            }
-            fileContent.unget();
-            tok.concept = TOKEN::TOKEN_CONCEPTS::NUMBER;
-            tok.number = std::stoi(number);
-            result.push_back(tok);
-            expressionParsed = true;
-        } else if (check_if_operator(c)) {
-            processOperator(c, fileContent, result);
-            expressionParsed = true;
-        } else if (check_if_char(c)) {
-            processChar(c, fileContent, result);
-            expressionParsed = true;
-        } else if (c == '\'' || c == '"') {
-            processString(c, fileContent, result);
-            expressionParsed = true;
-        } else {
-            std::cerr << "Unexpected character encountered inside 'if' condition: " << c << std::endl;
-            result.pop_back();
-            return;
-        }
-    }
-
-    if (c != ')') {
-        std::cerr << "Error: Expected ')' to close 'if' condition" << std::endl;
-        return;
-    }
-    push_concept_token(TOKEN::TOKEN_CONCEPTS::CLOSE_BRACKETS);
-
-    
-    while (fileContent.get(c) && c != '\n') {
-        if (!std::isspace(c)) {
-            std::cerr << "Error: Unexpected characters after 'if' condition" << std::endl;
-            return;
-        }
-    }
-    fileContent.unget(); 
     return;
 } else if (buffer == "else") {
     push_concept_token(TOKEN::TOKEN_CONCEPTS::ELSE);
-
-    
-    while (fileContent.get(c) && std::isspace(c)) {
-        
-    }
-
-    if (c != '{') {
-        std::cerr << "Error: Expected '{' after 'else'" << std::endl;
-        return;
-    }
-
-    push_concept_token(TOKEN::TOKEN_CONCEPTS::OPEN_BRACKETS);
-
-    
-    while (fileContent.get(c) && c != '}') {
-        TOKEN tok;
-        if (check_if_number(c)) {
-            std::string number;
-            number.push_back(c);
-            while (fileContent.get(c) && check_if_number(c)) {
-                number.push_back(c);
-            }
-
-            tok.concept = TOKEN::TOKEN_CONCEPTS::NUMBER;
-            tok.number = std::stoi(number);
-            result.push_back(tok);
-
-            
-            if (fileContent) {
-                fileContent.unget();
-            } else {
-                std::cerr << "Error: Unable to unget character after number" << std::endl;
-            }
-        }
-        else if (check_if_operator(c)) {
-            processOperator(c, fileContent, result);
-            if(!fileContent)
-            {
-                break;
-            }
-        }
-        else if (check_if_char(c)) {
-            processChar(c, fileContent, result);
-            if(!fileContent)
-            {
-                break;
-            }
-        }
-        else if (c == '\'' || c == '"') {
-            processString(c, fileContent, result);
-            if(!fileContent)
-            {
-                break;
-            }
-        }
-        else {
-            std::cerr << "Unexpected character encountered: " << c << std::endl;
-        }
-    }
-
-    if (c != '}') {
-        std::cerr << "Error: Expected '}' to close 'else' block" << std::endl;
-        return;
-    }
-    push_concept_token(TOKEN::TOKEN_CONCEPTS::CLOSE_BRACKETS);
-    
-    fileContent.unget();
     return;
-
-
-
     } else if(buffer == "class") {
 
     }

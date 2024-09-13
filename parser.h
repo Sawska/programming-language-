@@ -16,6 +16,8 @@
 #include "BinaryOperationNode.h"
 #include "BlockNode.h"
 #include "ReturnNode.h"
+#include "IfNode.h"
+#include "WhileNode.h"
 
 class Parser {
 public:

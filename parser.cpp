@@ -144,7 +144,10 @@ ASTNodePtr Parser::parseFactor() {
         return parseVariableOrAssignment();
     } else if (token.concept == TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME) {
         return handleVariableReference();
-    } else {
+    }  else if(token.concept == TOKEN::TOKEN_CONCEPTS::IF) {
+        return parseIf();
+    }
+    else {
         std::cerr << "Unexpected token: " << token.op << " at index: " << index << std::endl;
         throw std::runtime_error("Unexpected token: " + std::to_string(token.op));
     }
@@ -290,14 +293,79 @@ ASTNodePtr Parser::parseStatement() {
     }
 }
 
-ASTNodePtr Parser::parseIf()
-{
-    return ASTNodePtr();
+ASTNodePtr Parser::parseIf() {
+    index++;  
+    auto node = std::make_unique<IfNode>(nullptr, nullptr);  
+
+    
+    if (tokens[index].concept != TOKEN::TOKEN_CONCEPTS::OPEN_CIRCLE_BRACKETS) {
+        std::cerr << "Error: 'if' statement needs an opening '('." << std::endl;
+        throw std::runtime_error("Expected '(' after 'if'");
+    }
+
+    index++;  
+
+
+    node->expression = parseLogicalExpression();  
+
+    
+    if (tokens[index].concept != TOKEN::TOKEN_CONCEPTS::CLOSE_CIRCLE_BRACKETS) {
+        throw std::runtime_error("Error: Mismatched or missing ')'.");
+    }
+
+    index++; 
+
+    
+    if (tokens[index].concept != TOKEN::TOKEN_CONCEPTS::OPEN_BRACKETS) {
+        throw std::runtime_error("Error: 'if' statement needs an opening '{'.");
+    }
+
+
+    
+    node->ifBlock = parseBlock();  
+
+    
+    if (tokens[index].concept == TOKEN::TOKEN_CONCEPTS::ELSE) {
+        index++; 
+
+        if (tokens[index].concept == TOKEN::TOKEN_CONCEPTS::IF) {
+            
+            node->elseBlock = parseIf();  
+        } else if (tokens[index].concept == TOKEN::TOKEN_CONCEPTS::OPEN_BRACKETS) {
+
+            index++; 
+            node->elseBlock = parseBlock();  
+        } else {
+            throw std::runtime_error("Error: Expected '{' after 'else'.");
+        }
+    }
+
+    return node;
 }
+
+
 
 ASTNodePtr Parser::parseWhile()
 {
-    return ASTNodePtr();
+    index++;
+    auto node = std::make_unique<WhileNode>(nullptr, nullptr);      
+
+    if (tokens[index].concept != TOKEN::TOKEN_CONCEPTS::OPEN_CIRCLE_BRACKETS) {
+        std::cerr << "Error: 'while' statement needs an opening '('." << std::endl;
+        throw std::runtime_error("Expected '(' after 'while'");
+    }
+    index++;  
+    node->expression = parseLogicalExpression();  
+    if (tokens[index].concept != TOKEN::TOKEN_CONCEPTS::CLOSE_CIRCLE_BRACKETS) {
+        throw std::runtime_error("Error: Mismatched or missing ')'.");
+    }
+    index++; 
+    if (tokens[index].concept != TOKEN::TOKEN_CONCEPTS::OPEN_BRACKETS) {
+        throw std::runtime_error("Error: 'while' statement needs an opening '{'.");
+    }
+    node->WhileBlock = parseBlock();  
+
+    return node;
 }
 
 ASTNodePtr Parser::parseReturn()
@@ -310,3 +378,4 @@ ASTNodePtr Parser::parseReturn()
         }
         return std::make_unique<ReturnNode>(std::move(expr));
 }
+

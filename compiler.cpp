@@ -150,6 +150,31 @@ std::variant<double, std::string> Compiler::evaluateAST(const ASTNodePtr& node) 
             }
         }
 
+        case AST::Type::IF: {
+    auto ifNode = dynamic_cast<IfNode*>(node.get());
+    
+    auto conditionValue = evaluateAST(ifNode->expression);
+    
+    if (std::holds_alternative<double>(conditionValue)) {
+        
+        if (std::get<double>(conditionValue)) {
+            
+            return evaluateAST(ifNode->ifBlock);
+        } else {
+            
+            if (ifNode->elseBlock) {
+                return evaluateAST(ifNode->elseBlock);
+            }
+
+            return {};
+        }
+    } else {
+        throw std::runtime_error("Condition in if statement did not evaluate to a boolean.");
+    }
+}
+
+
+
         case AST::Type::UnaryOperation: {
             auto operandResult = evaluateAST(node->left);
 
@@ -170,6 +195,28 @@ std::variant<double, std::string> Compiler::evaluateAST(const ASTNodePtr& node) 
             }
             throw std::runtime_error("Unary operations can only be performed on numbers");
         }
+
+        case AST::Type::WHILE: {
+            auto whileNode = dynamic_cast<WhileNode*>(node.get());
+            auto conditionValue = evaluateAST(whileNode->expression);
+
+
+            if (std::holds_alternative<double>(conditionValue)) {
+        
+        if (std::get<double>(conditionValue)) {
+            
+            return evaluateAST(whileNode->WhileBlock);
+        } else {
+            return {};
+        }
+    } else {
+        throw std::runtime_error("Condition in while statement did not evaluate to a boolean.");
+    }
+        }
+
+
+
+        
 
         case AST::Type::ParenthesizedExpression:
             return evaluateAST(node->left);

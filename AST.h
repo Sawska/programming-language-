@@ -23,7 +23,9 @@ public:
         Unknown,
         Block,
         Empty,
-        Return
+        Return,
+        IF,
+        WHILE
     };
 
     Type type;
