@@ -18,6 +18,8 @@
 #include "ReturnNode.h"
 #include "IfNode.h"
 #include "WhileNode.h"
+#include "BreakNode.h"
+#include "ContinueNode.h"
 
 class Parser {
 public:
@@ -43,7 +45,10 @@ public:
     ASTNodePtr parseWhile();
     ASTNodePtr parseReturn();
     std::stack<std::unique_ptr<SymbolTable>> symbolTableStack;
-
+    ASTNodePtr findVariableInSymbolTableStack(const std::string& varName, SymbolTable& currentTable);
+    ASTNodePtr parseContinue();
+    ASTNodePtr parseBreak();
+    ASTNodePtr parseFor();
 
 private:
     std::vector<TOKEN> tokens;

@@ -25,7 +25,9 @@ public:
         Empty,
         Return,
         IF,
-        WHILE
+        WHILE,
+        Break,
+        Continue,
     };
 
     Type type;

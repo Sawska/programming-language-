@@ -22,6 +22,8 @@ add_executable(PROGRAMMING_LANGUAGE
     ReturnNode.cpp
     ifNode.cpp
     WhileNode.cpp
+    ContinueNode.cpp
+    BreakNode.cpp
 )
 
 

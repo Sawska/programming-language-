@@ -26,6 +26,7 @@ private:
     ASTNodePtr root;
     void REPL();
     std::stack<std::unique_ptr<SymbolTable>> symbolTableStack;
+    std::stack<bool> loopStack; 
 };
 
 #endif // COMPILER_H

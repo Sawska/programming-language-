@@ -62,6 +62,8 @@ struct TOKEN
         IF,
         WHILE,
         ELSE,
+        SEMICOLON,
+        FOR
     };
 
 

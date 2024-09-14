@@ -76,7 +76,8 @@ ASTNodePtr Parser::parseLogicalExpression() {
         } else if (token.op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
             index++;
             break;
-        } else {
+        }
+        else {
             break;
         }
     }
@@ -129,6 +130,8 @@ ASTNodePtr Parser::parseFactor() {
         }
         index++;
         return expr;
+    } else if(token.concept == TOKEN::TOKEN_CONCEPTS::FOR)  {
+        return parseFor();
     } else if (token.concept == TOKEN::TOKEN_CONCEPTS::OPEN_BRACKETS) {
         return parseBlock();
     } else if (token.op == TOKEN::OPERATORS::NOT_OPERATOR ||
@@ -144,8 +147,13 @@ ASTNodePtr Parser::parseFactor() {
         return parseVariableOrAssignment();
     } else if (token.concept == TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME) {
         return handleVariableReference();
-    }  else if(token.concept == TOKEN::TOKEN_CONCEPTS::IF) {
+    }   else if(token.concept == TOKEN::TOKEN_CONCEPTS::WHILE) {
+        return parseWhile();
+    }
+    else if(token.concept == TOKEN::TOKEN_CONCEPTS::IF) {
         return parseIf();
+    } else if(token.concept == TOKEN::TOKEN_CONCEPTS::RETURN) {
+        return parseReturn();
     }
     else {
         std::cerr << "Unexpected token: " << token.op << " at index: " << index << std::endl;
@@ -243,12 +251,14 @@ ASTNodePtr Parser::handleVariableReference() {
         return AST::makeEmptyNode();        
     }
 
-
-    ASTNodePtr variableValueNode = currentTable.getVariableValue(varName);
+    
+ 
+    ASTNodePtr variableValueNode = findVariableInSymbolTableStack(varName,currentTable);
 
     if (!variableValueNode) {
         std::cerr << "Undefined variable: " << varName << std::endl;
         throw std::runtime_error("Undefined variable: " + varName);
+        
     }
 
 
@@ -287,7 +297,12 @@ ASTNodePtr Parser::parseStatement() {
     } else if (token.concept == TOKEN::TOKEN_CONCEPTS::RETURN) {
 
         return parseReturn();
-    } else {
+    } else if(token.concept == TOKEN::TOKEN_CONCEPTS::CONTINUE) {
+        return parseContinue();
+    } else if(token.concept == TOKEN::TOKEN_CONCEPTS::BREAK) {
+        return parseBreak();
+    }
+    else {
         std::cerr << "Unexpected token: " << token.variableName << " at index: " << index << std::endl;
         throw std::runtime_error("Unexpected token: " + std::to_string(token.concept));
     }
@@ -379,3 +394,73 @@ ASTNodePtr Parser::parseReturn()
         return std::make_unique<ReturnNode>(std::move(expr));
 }
 
+ASTNodePtr Parser::parseBreak() {
+    index++;
+    
+    
+    if (index < tokens.size() && tokens[index].op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
+        index++;
+        return std::make_unique<BreakNode>();
+    } else {
+        std::cerr << "Error: Unexpected token after 'break' at index " << index << std::endl;
+        return nullptr;
+    }
+}
+
+ASTNodePtr Parser::parseContinue() {
+    index++; 
+    
+    
+    if (index < tokens.size() && tokens[index].op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
+        index++;
+        return std::make_unique<ContinueNode>();
+    } else {
+        std::cerr << "Error: Unexpected token after 'continue' at index " << index << std::endl;
+        return nullptr;
+    }
+}
+
+
+
+
+ASTNodePtr Parser::findVariableInSymbolTableStack(const std::string& varName, SymbolTable& currentTable) {
+
+    ASTNodePtr variableValueNode = currentTable.getVariableValue(varName);
+
+    if (variableValueNode) {
+        return variableValueNode;
+    }
+
+
+    std::stack<std::unique_ptr<SymbolTable>> tempStack;
+    bool found = false;
+
+
+    while (!symbolTableStack.empty()) {
+        std::unique_ptr<SymbolTable> tempTable = std::move(symbolTableStack.top());
+        symbolTableStack.pop();
+        tempStack.push(std::move(tempTable));
+        variableValueNode = tempStack.top()->getVariableValue(varName);
+        
+        if (variableValueNode) {
+            found = true;
+            break;
+        }
+    }
+
+    
+    while (!tempStack.empty()) {
+        symbolTableStack.push(std::move(tempStack.top()));
+        tempStack.pop();
+    }
+
+    if (!found) {
+        std::cerr << "Undefined variable: " << varName << std::endl;
+        throw std::runtime_error("Undefined variable: " + varName);
+    }
+
+    return variableValueNode;
+}
+ASTNodePtr Parser::parseFor() {
+    
+}

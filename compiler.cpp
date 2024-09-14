@@ -54,18 +54,31 @@ std::variant<double, std::string> Compiler::evaluateAST(const ASTNodePtr& node) 
         if (statement->type == AST::Type::Empty) {
             continue;
         }
-        
+
         auto result = evaluateAST(statement);
 
+        if (statement->type == AST::Type::Break) {
+            loopStack.pop();
+            return {}; 
+        }
+        
+        if (statement->type == AST::Type::Continue) {
+            
+            if (loopStack.top()) {
+                return {};
+            } else {
+                throw std::runtime_error("Continue statement outside of a loop.");
+            }
+        }
 
         if (statement->type == AST::Type::Return) {
             symbolTableStack.pop(); 
-            return result;  
+            return result;
         }
     }
 
     symbolTableStack.pop();
-    return {};  
+    return {};
 }
 
 
@@ -76,13 +89,33 @@ std::variant<double, std::string> Compiler::evaluateAST(const ASTNodePtr& node) 
         return evaluateAST(returnNode->value);
     }
 
+    case AST::Type::Break: {
+        if (!loopStack.empty() && loopStack.top()) {
+            loopStack.pop();
+            return {};
+        } else {
+            throw std::runtime_error("Break statement outside of a loop.");
+        }
+    }
+
+
+
+    case AST::Type::Continue: {
+             if (!loopStack.empty() && loopStack.top()) {
+     
+        return {};
+    } else {
+        throw std::runtime_error("Continue statement outside of a loop.");
+    }
+    }
+
 
 
         case AST::Type::BinaryOperation: {
-           
-            if (node->op == TOKEN::OPERATORS::SEQUENCE_OPERATOR) {
-                evaluateAST(node->left);
-                return evaluateAST(node->right);
+           auto binaryfNode = dynamic_cast<BinaryOperationNode*>(node.get());
+            if (binaryfNode->op == TOKEN::OPERATORS::SEQUENCE_OPERATOR) {
+                evaluateAST(binaryfNode->left);
+                return evaluateAST(binaryfNode->right);
             }
 
             auto leftValue = evaluateAST(node->left);
@@ -197,22 +230,25 @@ std::variant<double, std::string> Compiler::evaluateAST(const ASTNodePtr& node) 
         }
 
         case AST::Type::WHILE: {
-            auto whileNode = dynamic_cast<WhileNode*>(node.get());
-            auto conditionValue = evaluateAST(whileNode->expression);
+    auto whileNode = dynamic_cast<WhileNode*>(node.get());
+    if (!whileNode) throw std::runtime_error("Invalid while node");
 
+    loopStack.push(true); 
+    auto conditionValue = evaluateAST(whileNode->expression);
 
-            if (std::holds_alternative<double>(conditionValue)) {
-        
+    if (std::holds_alternative<double>(conditionValue)) {
         if (std::get<double>(conditionValue)) {
-            
-            return evaluateAST(whileNode->WhileBlock);
+            auto result = evaluateAST(whileNode->WhileBlock);
+            loopStack.pop();
+            return result;
         } else {
+            loopStack.pop();
             return {};
         }
     } else {
         throw std::runtime_error("Condition in while statement did not evaluate to a boolean.");
     }
-        }
+}
 
 
 

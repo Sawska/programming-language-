@@ -113,6 +113,7 @@ bool Lexer::check_if_operator(char c) {
         case ']':
         case '(':
         case ')':
+        case ';':
             return true;
         default:
             return false;
@@ -265,6 +266,9 @@ void Lexer::processOperator(char c, std::ifstream &fileContent, std::vector<TOKE
             tok.concept = TOKEN::TOKEN_CONCEPTS::CLOSE_CIRCLE_BRACKETS;
             result.push_back(tok);
             break;
+        case ';':
+            tok.concept = TOKEN::TOKEN_CONCEPTS::SEMICOLON;
+            result.push_back(tok);
         default:
             std::cerr << "Unexpected character encountered: " << c << std::endl;
     }
@@ -313,7 +317,7 @@ void Lexer::processChar(char c, std::ifstream &fileContent, std::vector<TOKEN> &
     
         return;
     } else if(buffer == "for")  {
-
+    push_concept_token(TOKEN::TOKEN_CONCEPTS::FOR);    
     } else if(buffer == "while") {
     push_concept_token(TOKEN::TOKEN_CONCEPTS::WHILE);    
     } else if (buffer == "if") {
@@ -328,22 +332,18 @@ void Lexer::processChar(char c, std::ifstream &fileContent, std::vector<TOKEN> &
     else if (buffer == "break") {
         TOKEN tok;
         push_concept_token(TOKEN::TOKEN_CONCEPTS::BREAK);
-
-        if (fileContent.get(c) && c == '\n') {
+        if(c == '\n')
+        {
             push_operator_token(TOKEN::OPERATORS::NEWLINE_OPERATOR);
-        } else {
-            throw std::runtime_error("Can't have something after 'break'");
         }
         return;
     } else if (buffer == "continue") {
         TOKEN tok;
         push_concept_token(TOKEN::TOKEN_CONCEPTS::CONTINUE);
-
-        if (fileContent.get(c) && c == '\n') {
+        if(c == '\n')
+        {
             push_operator_token(TOKEN::OPERATORS::NEWLINE_OPERATOR);
-        } else {
-            throw std::runtime_error("Can't have something after 'continue'");
-        }
+        } 
         return;
     } else {
         state = LexerState::VariableName;
