@@ -76,6 +76,9 @@ ASTNodePtr Parser::parseLogicalExpression() {
         } else if (token.op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
             index++;
             break;
+        } else if(token.concept == TOKEN::TOKEN_CONCEPTS::SEMICOLON)
+        {
+            break;
         }
         else {
             break;
@@ -131,6 +134,7 @@ ASTNodePtr Parser::parseFactor() {
         index++;
         return expr;
     } else if(token.concept == TOKEN::TOKEN_CONCEPTS::FOR)  {
+        index++;
         return parseFor();
     } else if (token.concept == TOKEN::TOKEN_CONCEPTS::OPEN_BRACKETS) {
         return parseBlock();
@@ -154,7 +158,7 @@ ASTNodePtr Parser::parseFactor() {
         return parseIf();
     } else if(token.concept == TOKEN::TOKEN_CONCEPTS::RETURN) {
         return parseReturn();
-    }
+    } 
     else {
         std::cerr << "Unexpected token: " << token.op << " at index: " << index << std::endl;
         throw std::runtime_error("Unexpected token: " + std::to_string(token.op));
@@ -239,26 +243,44 @@ ASTNodePtr Parser::handleVariableReference() {
     std::string varName = token.variableName;
     index++;
 
+    
+    if (index < tokens.size() && 
+        (tokens[index].op == TOKEN::OPERATORS::EQUALS_OPERATOR || 
+         tokens[index].op == TOKEN::OPERATORS::INCREMENT_OPERATOR || 
+         tokens[index].op == TOKEN::OPERATORS::DECREMENT_OPERATOR || 
+         tokens[index].op == TOKEN::OPERATORS::NOT_OPERATOR)) {
 
-    if (index < tokens.size() && tokens[index].op == TOKEN::OPERATORS::EQUALS_OPERATOR) {
-        index++;
-        auto expr = parseExpression();
+        
+        auto op = tokens[index].op;
+        
+        
 
+    
         if (index < tokens.size() && tokens[index].op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
             index++;
         }
-        currentTable.setVariableValue(varName, std::move(expr));
-        return AST::makeEmptyNode();        
+
+        
+        if (op == TOKEN::OPERATORS::EQUALS_OPERATOR) {
+            index++;
+        auto expr = parseExpression();
+            currentTable.setVariableValue(varName, std::move(expr));
+        } else if (op == TOKEN::OPERATORS::INCREMENT_OPERATOR) {
+            index++;
+        } else if (op == TOKEN::OPERATORS::DECREMENT_OPERATOR) {
+            index++;
+        } else if (op == TOKEN::OPERATORS::NOT_OPERATOR) {
+            index++;
+        }
+        return AST::makeEmptyNode();
     }
+    
+    ASTNodePtr variableValueNode = findVariableInSymbolTableStack(varName, currentTable);
 
     
- 
-    ASTNodePtr variableValueNode = findVariableInSymbolTableStack(varName,currentTable);
-
     if (!variableValueNode) {
         std::cerr << "Undefined variable: " << varName << std::endl;
         throw std::runtime_error("Undefined variable: " + varName);
-        
     }
 
 
@@ -462,5 +484,56 @@ ASTNodePtr Parser::findVariableInSymbolTableStack(const std::string& varName, Sy
     return variableValueNode;
 }
 ASTNodePtr Parser::parseFor() {
+    auto node = std::make_unique<ForNode>(nullptr, nullptr, nullptr, nullptr);
+
     
+    if (tokens[index].concept != TOKEN::TOKEN_CONCEPTS::OPEN_CIRCLE_BRACKETS) {
+        std::cerr << "Error: 'for' statement needs an opening '('." << std::endl;
+        throw std::runtime_error("Expected '(' after 'for'");
+    }
+    index++;
+
+    
+    node->initialization = parseLogicalExpression();
+
+    
+    if (tokens[index].concept == TOKEN::TOKEN_CONCEPTS::SEMICOLON) {
+        index++;
+    } else {
+        std::cerr << "Error: Expected ';' after initialization in 'for' loop." << std::endl;
+        throw std::runtime_error("Expected ';' after initialization in 'for' loop");
+    }
+
+    
+    node->expression = parseLogicalExpression();
+
+    
+    if (tokens[index].concept == TOKEN::TOKEN_CONCEPTS::SEMICOLON) {
+        index++;
+    } else {
+        std::cerr << "Error: Expected ';' after condition in 'for' loop." << std::endl;
+        throw std::runtime_error("Expected ';' after condition in 'for' loop");
+    }
+
+    
+    node->increment = parseLogicalExpression();
+
+
+    if (tokens[index].concept == TOKEN::TOKEN_CONCEPTS::CLOSE_CIRCLE_BRACKETS) {
+        index++; 
+    } else {
+        std::cerr << "Error: Expected ')' after increment in 'for' loop." << std::endl;
+        throw std::runtime_error("Expected ')' after increment in 'for' loop");
+    }
+
+
+    if (tokens[index].concept != TOKEN::TOKEN_CONCEPTS::OPEN_BRACKETS) {
+        std::cerr << "Error: 'for' loop needs an opening '{' for the block." << std::endl;
+        throw std::runtime_error("Expected '{' to start 'for' loop block");
+    }
+
+
+    node->forBlock = parseBlock();
+
+    return node;
 }

@@ -20,6 +20,7 @@
 #include "WhileNode.h"
 #include "BreakNode.h"
 #include "ContinueNode.h"
+#include "ForNode.h"
 
 class Parser {
 public:

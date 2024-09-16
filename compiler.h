@@ -5,20 +5,39 @@
 #include "parser.h" 
 #include "SymbolTable.h"
 
-#define ISREPL 0
+struct ContinueType {
 
+};
+
+struct VoidType {
+
+};
+
+struct BreakType {
+    
+};
+
+struct ReturnType {
+  
+    ASTNodePtr returnValue;
+    ReturnType(ASTNodePtr value) : returnValue(std::move(value)) {}
+};
+
+#define ISREPL 0
+using ASTResult = std::variant<double, std::string, ContinueType, BreakType, ReturnType,VoidType>;
 class Compiler {
 public:
     Compiler(Lexer& lex) 
         : lexer(lex), 
-          parser(lexer.read_file(), std::move(lexer.table)), 
-          symbolTableStack(std::move(parser.symbolTableStack)) 
+          parser(lexer.read_file(), std::move(lexer.table))
     {
         root = parser.parse();
+        symbolTableStack =  std::move(parser.symbolTableStack);
     }
 
     void run();
-    std::variant<double, std::string> evaluateAST(const ASTNodePtr& node);
+    ASTResult evaluateAST(const ASTNodePtr& node);
+    void update_variable(const std::string& varName, ASTNodePtr node);
 
 private:
     Lexer& lexer;

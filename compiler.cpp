@@ -1,5 +1,7 @@
 #include "compiler.h"
 
+
+
 void Compiler::run() {
     std::cout << "starting of compiler work" << std::endl;
     if(!ISREPL)
@@ -18,6 +20,17 @@ void Compiler::REPL() {
         std::cout << std::get<double>(result) << std::endl;
     } else if (std::holds_alternative<std::string>(result)) {
         std::cout << std::get<std::string>(result) << std::endl;
+    } else if(std::holds_alternative<ReturnType>(result))
+    {
+        ReturnType retr =  std::move(std::get<ReturnType>(result));
+        
+    } else if(std::holds_alternative<BreakType>(result))
+    {
+
+    } else if(std::holds_alternative<ContinueType>(result)) {
+        
+    } else if(std::holds_alternative<VoidType>(result)) {
+
     }
 }
 
@@ -25,7 +38,7 @@ void Compiler::REPL() {
 
 
 
-std::variant<double, std::string> Compiler::evaluateAST(const ASTNodePtr& node) {
+ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
     if (!node) throw std::runtime_error("Null AST node");
 
     switch (node->type) {
@@ -59,13 +72,13 @@ std::variant<double, std::string> Compiler::evaluateAST(const ASTNodePtr& node) 
 
         if (statement->type == AST::Type::Break) {
             loopStack.pop();
-            return {}; 
+            return BreakType{}; 
         }
         
         if (statement->type == AST::Type::Continue) {
             
             if (loopStack.top()) {
-                return {};
+                return ContinueType{};
             } else {
                 throw std::runtime_error("Continue statement outside of a loop.");
             }
@@ -78,36 +91,35 @@ std::variant<double, std::string> Compiler::evaluateAST(const ASTNodePtr& node) 
     }
 
     symbolTableStack.pop();
-    return {};
+    return VoidType{};
 }
 
 
     case AST::Type::Return: {
-        auto returnNode = dynamic_cast<ReturnNode*>(node.get());
-
-        if (!returnNode) throw std::runtime_error("Invalid return node");
-        return evaluateAST(returnNode->value);
+    if (auto returnNode = dynamic_cast<ReturnNode*>(node.get())) {
+        return ReturnType(std::move(returnNode->value));
+    } else {
+        throw std::runtime_error("Invalid return node");
     }
+}
 
     case AST::Type::Break: {
-        if (!loopStack.empty() && loopStack.top()) {
-            loopStack.pop();
-            return {};
-        } else {
-            throw std::runtime_error("Break statement outside of a loop.");
-        }
+    if (!loopStack.empty() && loopStack.top()) {
+        return BreakType{};  
+    } else {
+        throw std::runtime_error("Break statement outside of a loop.");
     }
+}
 
 
 
     case AST::Type::Continue: {
-             if (!loopStack.empty() && loopStack.top()) {
-     
-        return {};
+    if (!loopStack.empty() && loopStack.top()) {
+        return ContinueType{};  
     } else {
         throw std::runtime_error("Continue statement outside of a loop.");
     }
-    }
+}
 
 
 
@@ -118,10 +130,10 @@ std::variant<double, std::string> Compiler::evaluateAST(const ASTNodePtr& node) 
                 return evaluateAST(binaryfNode->right);
             }
 
-            auto leftValue = evaluateAST(node->left);
-            auto rightValue = evaluateAST(node->right);
+            auto leftValue = evaluateAST(binaryfNode->left);
+            auto rightValue = evaluateAST(binaryfNode->right);
 
-            if (node->op == TOKEN::OPERATORS::PLUS_OPERATOR) {
+            if (binaryfNode->op == TOKEN::OPERATORS::PLUS_OPERATOR) {
                 if (std::holds_alternative<std::string>(leftValue) || std::holds_alternative<std::string>(rightValue)) {
                     auto convertToString = [](const auto& value) -> std::string {
                         if (std::holds_alternative<std::string>(value)) {
@@ -144,7 +156,7 @@ std::variant<double, std::string> Compiler::evaluateAST(const ASTNodePtr& node) 
             double leftNum = std::get<double>(leftValue);
             double rightNum = std::get<double>(rightValue);
 
-            switch (node->op) {
+            switch (binaryfNode->op) {
                 case TOKEN::OPERATORS::PLUS_OPERATOR:
                     return leftNum + rightNum;
                 case TOKEN::OPERATORS::MINUS_OPERATOR:
@@ -199,7 +211,7 @@ std::variant<double, std::string> Compiler::evaluateAST(const ASTNodePtr& node) 
                 return evaluateAST(ifNode->elseBlock);
             }
 
-            return {};
+            return VoidType{};
         }
     } else {
         throw std::runtime_error("Condition in if statement did not evaluate to a boolean.");
@@ -209,46 +221,130 @@ std::variant<double, std::string> Compiler::evaluateAST(const ASTNodePtr& node) 
 
 
         case AST::Type::UnaryOperation: {
-            auto operandResult = evaluateAST(node->left);
+    auto unaryNode = dynamic_cast<UnaryOperationNode*>(node.get());
+    auto operandResult = evaluateAST(unaryNode->operand);
 
-            if (std::holds_alternative<double>(operandResult)) {
-                double operandValue = std::get<double>(operandResult);
-                switch (node->op) {
-                    case TOKEN::OPERATORS::NOT_OPERATOR:
-                        return static_cast<double>(operandValue == 0);
-                    case TOKEN::OPERATORS::BIT_NOT_OPERATOR:
-                        return static_cast<double>(~static_cast<int>(operandValue));
-                    case TOKEN::OPERATORS::INCREMENT_OPERATOR:
-                        return ++operandValue;
-                    case TOKEN::OPERATORS::DECREMENT_OPERATOR:
-                        return --operandValue;
-                    default:
-                        throw std::runtime_error("Unsupported unary operator");
+    
+    auto var = dynamic_cast<VariableNode*>(unaryNode->operand.get());
+
+    if (std::holds_alternative<double>(operandResult)) {
+        double operandValue = std::get<double>(operandResult);
+
+        switch (unaryNode->op) {
+            case TOKEN::OPERATORS::NOT_OPERATOR:
+                return static_cast<double>(operandValue == 0);
+
+            case TOKEN::OPERATORS::BIT_NOT_OPERATOR:
+                return static_cast<double>(~static_cast<int>(operandValue));
+
+            case TOKEN::OPERATORS::INCREMENT_OPERATOR: {
+                if (var) {
+                    
+                    ASTNodePtr node = AST::makeNumberNode(++operandValue);
+                    update_variable(var->name, std::move(node));  
+                    return ++operandValue;  
+                } else {
+                    return ++operandValue;
                 }
             }
-            throw std::runtime_error("Unary operations can only be performed on numbers");
+
+            case TOKEN::OPERATORS::DECREMENT_OPERATOR: {
+                if (var) {
+
+                    ASTNodePtr node = AST::makeNumberNode(--operandValue);
+                    update_variable(var->name, std::move(node));  
+                    return VoidType{};  
+                } else {
+                    return --operandValue;
+                }
+            }
+
+            default:
+                throw std::runtime_error("Unsupported unary operator");
         }
+    }
+
+    throw std::runtime_error("Unary operations can only be performed on numbers");
+}
+
 
         case AST::Type::WHILE: {
-    auto whileNode = dynamic_cast<WhileNode*>(node.get());
-    if (!whileNode) throw std::runtime_error("Invalid while node");
-
-    loopStack.push(true); 
-    auto conditionValue = evaluateAST(whileNode->expression);
-
-    if (std::holds_alternative<double>(conditionValue)) {
-        if (std::get<double>(conditionValue)) {
+    if (auto whileNode = dynamic_cast<WhileNode*>(node.get())) {
+        loopStack.push(true);
+        while (true) {
+            
+            auto conditionValue = evaluateAST(whileNode->expression);
+            if (!std::holds_alternative<double>(conditionValue) || !std::get<double>(conditionValue)) {
+                break;  
+            }
+            
+            
             auto result = evaluateAST(whileNode->WhileBlock);
-            loopStack.pop();
-            return result;
-        } else {
-            loopStack.pop();
-            return {};
+            
+            
+            if (std::holds_alternative<BreakType>(result)) {
+                return VoidType{};          
+                break;
+            }
+            if (std::holds_alternative<ReturnType>(result)) {
+                loopStack.pop();
+                return result;
+            }
+            if (std::holds_alternative<ContinueType>(result)) {
+                continue;
+            }
         }
-    } else {
-        throw std::runtime_error("Condition in while statement did not evaluate to a boolean.");
+        loopStack.pop(); 
+        return VoidType{};
     }
 }
+
+
+case AST::Type::FOR: {
+    if (auto forNode = dynamic_cast<ForNode*>(node.get())) {
+        loopStack.push(true);  
+
+        
+        evaluateAST(forNode->initialization);
+
+        
+        while (true) {
+            auto conditionValue = evaluateAST(forNode->expression);
+            if (!std::holds_alternative<double>(conditionValue) || !std::get<double>(conditionValue)) {
+                break; 
+            }
+
+            
+            auto result = evaluateAST(forNode->forBlock);
+
+            
+            if (std::holds_alternative<BreakType>(result)) {
+                return VoidType{};          
+                break;
+            }
+            if (std::holds_alternative<ReturnType>(result)) {
+                loopStack.pop();
+                return result;
+            }
+            if (std::holds_alternative<ContinueType>(result)) {
+            
+                evaluateAST(forNode->increment);  
+                continue;
+            }
+
+            
+            std::cout << std::get<double>(evaluateAST(forNode->increment)) << std::endl;
+
+
+
+            std::cout << "" << std::endl;
+        }
+
+        loopStack.pop();
+        return VoidType{};  
+    }
+}
+
 
 
 
@@ -266,5 +362,44 @@ std::variant<double, std::string> Compiler::evaluateAST(const ASTNodePtr& node) 
 
         default:
             throw std::runtime_error("Unknown AST node type");
+    }
+}
+
+
+void Compiler::update_variable(const std::string& varName, ASTNodePtr node) {
+    
+    std::stack<std::unique_ptr<SymbolTable>> tempStack;
+    bool found = false;
+
+    
+    while (!symbolTableStack.empty()) {
+        
+        SymbolTable* currentTable = symbolTableStack.top().get();
+        
+        
+        ASTNodePtr variableValueNode = currentTable->getVariableValue(varName);
+
+        if (variableValueNode) {
+            
+            currentTable->setVariableValue(varName, std::move(node));
+            found = true;
+            break;
+        }
+
+
+        tempStack.push(std::move(symbolTableStack.top()));
+        symbolTableStack.pop();
+    }
+
+
+    while (!tempStack.empty()) {
+        symbolTableStack.push(std::move(tempStack.top()));
+        tempStack.pop();
+    }
+
+
+    if (!found) {
+        std::cerr << "Undefined variable: " << varName << std::endl;
+        throw std::runtime_error("Undefined variable: " + varName);
     }
 }

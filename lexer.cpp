@@ -269,6 +269,7 @@ void Lexer::processOperator(char c, std::ifstream &fileContent, std::vector<TOKE
         case ';':
             tok.concept = TOKEN::TOKEN_CONCEPTS::SEMICOLON;
             result.push_back(tok);
+            break;
         default:
             std::cerr << "Unexpected character encountered: " << c << std::endl;
     }
@@ -318,8 +319,11 @@ void Lexer::processChar(char c, std::ifstream &fileContent, std::vector<TOKEN> &
         return;
     } else if(buffer == "for")  {
     push_concept_token(TOKEN::TOKEN_CONCEPTS::FOR);    
+    fileContent.unget();
+    return;
     } else if(buffer == "while") {
     push_concept_token(TOKEN::TOKEN_CONCEPTS::WHILE);    
+    return;
     } else if (buffer == "if") {
     push_concept_token(TOKEN::TOKEN_CONCEPTS::IF);
     return;
@@ -362,7 +366,7 @@ void Lexer::processChar(char c, std::ifstream &fileContent, std::vector<TOKEN> &
         varToken.variableName = buffer;
         result.push_back(varToken);
         buffer.clear();
-
+        fileContent.unget();
         if (fileContent.get(c) && c == '=') {
             std::cout << "Processing assignment operator" << std::endl;
             TOKEN assignToken;
@@ -484,6 +488,10 @@ void Lexer::processAssignment(std::ifstream &fileContent, std::vector<TOKEN> &re
             processString(c, fileContent, result);
         } else {
             processOperator(c, fileContent, result);
+            if(c == ';')
+            {
+                break;
+            }
         }
 
         if (c == '\n' || fileContent.peek() == EOF) {

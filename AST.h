@@ -28,6 +28,7 @@ public:
         WHILE,
         Break,
         Continue,
+        FOR,
     };
 
     Type type;
