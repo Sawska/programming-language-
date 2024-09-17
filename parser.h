@@ -21,6 +21,7 @@
 #include "BreakNode.h"
 #include "ContinueNode.h"
 #include "ForNode.h"
+#include "ArrayNode.h"
 
 class Parser {
 public:
@@ -50,6 +51,8 @@ public:
     ASTNodePtr parseContinue();
     ASTNodePtr parseBreak();
     ASTNodePtr parseFor();
+    ASTNodePtr parseArray();
+
 
 private:
     std::vector<TOKEN> tokens;

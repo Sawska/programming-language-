@@ -121,6 +121,8 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
     }
 }
 
+    
+
 
 
         case AST::Type::BinaryOperation: {

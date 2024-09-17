@@ -29,6 +29,8 @@ public:
         Break,
         Continue,
         FOR,
+        Array,
+        Access
     };
 
     Type type;

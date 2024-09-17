@@ -103,7 +103,12 @@ ASTNodePtr Parser::parseTerm() {
         } else if (token.op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
             index++;
             break;
-        } else {
+        } else if(token.concept == TOKEN::TOKEN_CONCEPTS::COMMA)  
+        {
+            index++;
+            break;
+        }
+        else {
             break;
         }
     }
@@ -133,7 +138,11 @@ ASTNodePtr Parser::parseFactor() {
         }
         index++;
         return expr;
-    } else if(token.concept == TOKEN::TOKEN_CONCEPTS::FOR)  {
+    } else if(token.concept == TOKEN::TOKEN_CONCEPTS::OPEN_SQUARE_BRACKETS)  {
+        index++;
+        parseArray();
+    }
+    else if(token.concept == TOKEN::TOKEN_CONCEPTS::FOR)  {
         index++;
         return parseFor();
     } else if (token.concept == TOKEN::TOKEN_CONCEPTS::OPEN_BRACKETS) {
@@ -248,7 +257,8 @@ ASTNodePtr Parser::handleVariableReference() {
         (tokens[index].op == TOKEN::OPERATORS::EQUALS_OPERATOR || 
          tokens[index].op == TOKEN::OPERATORS::INCREMENT_OPERATOR || 
          tokens[index].op == TOKEN::OPERATORS::DECREMENT_OPERATOR || 
-         tokens[index].op == TOKEN::OPERATORS::NOT_OPERATOR)) {
+         tokens[index].op == TOKEN::OPERATORS::NOT_OPERATOR) ||
+         tokens[index].concept == TOKEN::TOKEN_CONCEPTS::OPEN_SQUARE_BRACKETS) {
 
         
         auto op = tokens[index].op;
@@ -271,6 +281,9 @@ ASTNodePtr Parser::handleVariableReference() {
             index++;
         } else if (op == TOKEN::OPERATORS::NOT_OPERATOR) {
             index++;
+        } else if(op == TOKEN::TOKEN_CONCEPTS::OPEN_SQUARE_BRACKETS)
+        {
+            
         }
         return AST::makeEmptyNode();
     }
@@ -536,4 +549,54 @@ ASTNodePtr Parser::parseFor() {
     node->forBlock = parseBlock();
 
     return node;
+}
+
+ASTNodePtr Parser::parseArray()
+{
+    std::vector<ASTNodePtr> array;
+
+    
+    while (index < tokens.size() && tokens[index].concept != TOKEN::TOKEN_CONCEPTS::CLOSE_SQUARE_BRACKETS)
+    {
+        auto expression = parseLogicalExpression();
+        array.push_back(expression);
+
+        
+        if (index < tokens.size() && tokens[index].concept == TOKEN::TOKEN_CONCEPTS::COMMA)
+        {
+            ++index;
+        }
+    }
+
+    if (index >= tokens.size() || tokens[index].concept != TOKEN::TOKEN_CONCEPTS::CLOSE_SQUARE_BRACKETS) {
+        throw std::runtime_error("Expected closing square bracket.");
+    }
+
+    ++index;
+
+
+    auto arrayNode = std::make_unique<ArrayNode>(array);
+
+ 
+    bool containsWhileNode = false;
+    bool containsForNode = false;
+
+    for (const auto& node : array) {
+        if (dynamic_cast<WhileNode*>(node.get())) {
+            containsWhileNode = true;
+        }
+        if (dynamic_cast<ForNode*>(node.get())) {
+            containsForNode = true;
+        }
+    }
+
+    if (containsWhileNode) {
+            throw std::runtime_error("Can't have while");
+    }
+
+    if (containsForNode) {
+            throw std::runtime_error("Can't have for");
+    }
+
+    return arrayNode;
 }

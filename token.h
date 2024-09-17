@@ -39,6 +39,7 @@ struct TOKEN
         NOT_EQUALS_OPERATOR,
         NEWLINE_OPERATOR,
         SEQUENCE_OPERATOR
+        
     };
 
     
@@ -63,7 +64,8 @@ struct TOKEN
         WHILE,
         ELSE,
         SEMICOLON,
-        FOR
+        FOR,
+        COMMA,
     };
 
 

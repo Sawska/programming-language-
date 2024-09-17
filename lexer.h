@@ -28,11 +28,6 @@ class Lexer {
     void processVariable(std::ifstream &fileContent, std::vector<TOKEN> &result);
     void processString(char c,std::ifstream &fileContent, std::vector<TOKEN> &result);
     void processAssignment(std::ifstream &fileContent, std::vector<TOKEN> &result);
-    void handleWhile(std::ifstream &fileContent, std::vector<TOKEN> &result);
-    void handleClass(std::ifstream &fileContent, std::vector<TOKEN> &result);
-    void handleForLoop(std::ifstream &fileContent, std::vector<TOKEN> &result);
-    void handleIfStatment(std::ifstream &fileContent, std::vector<TOKEN> &result);
-    void handleElseStatment(std::ifstream &fileContent, std::vector<TOKEN> &result);
     std::unordered_set <std::string> private_words { "function" "let" "for" "while" "if" "else" "else if" "for", "class","break" "continue", "return"};
 };
 
