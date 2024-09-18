@@ -44,6 +44,7 @@ private:
     Parser parser;
     ASTNodePtr root;
     void REPL();
+    ASTNodePtr findVariableInSymbolTableStack(const std::string& varName, SymbolTable& currentTable);
     std::stack<std::unique_ptr<SymbolTable>> symbolTableStack;
     std::stack<bool> loopStack; 
 };

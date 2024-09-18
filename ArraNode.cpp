@@ -8,9 +8,7 @@ std::unique_ptr<AST> ArrayNode::clone() const {
     std::vector<ASTNodePtr> clonedElements;
     clonedElements.reserve(array.size());
     for (const auto& element : array) {
-        clonedElements.push_back(element->clone()); 
+        clonedElements.push_back(std::move(element->clone())); 
     }
-    return std::make_unique<ArrayNode>(clonedElements);
+return std::make_unique<ArrayNode>(std::move(clonedElements))
 }
-
-

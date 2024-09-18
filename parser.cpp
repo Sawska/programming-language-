@@ -281,7 +281,7 @@ ASTNodePtr Parser::handleVariableReference() {
             index++;
         } else if (op == TOKEN::OPERATORS::NOT_OPERATOR) {
             index++;
-        } else if(op == TOKEN::TOKEN_CONCEPTS::OPEN_SQUARE_BRACKETS)
+        } else if(tokens[index].concept == TOKEN::TOKEN_CONCEPTS::OPEN_SQUARE_BRACKETS)
         {
             
         }
@@ -458,44 +458,7 @@ ASTNodePtr Parser::parseContinue() {
 
 
 
-ASTNodePtr Parser::findVariableInSymbolTableStack(const std::string& varName, SymbolTable& currentTable) {
 
-    ASTNodePtr variableValueNode = currentTable.getVariableValue(varName);
-
-    if (variableValueNode) {
-        return variableValueNode;
-    }
-
-
-    std::stack<std::unique_ptr<SymbolTable>> tempStack;
-    bool found = false;
-
-
-    while (!symbolTableStack.empty()) {
-        std::unique_ptr<SymbolTable> tempTable = std::move(symbolTableStack.top());
-        symbolTableStack.pop();
-        tempStack.push(std::move(tempTable));
-        variableValueNode = tempStack.top()->getVariableValue(varName);
-        
-        if (variableValueNode) {
-            found = true;
-            break;
-        }
-    }
-
-    
-    while (!tempStack.empty()) {
-        symbolTableStack.push(std::move(tempStack.top()));
-        tempStack.pop();
-    }
-
-    if (!found) {
-        std::cerr << "Undefined variable: " << varName << std::endl;
-        throw std::runtime_error("Undefined variable: " + varName);
-    }
-
-    return variableValueNode;
-}
 ASTNodePtr Parser::parseFor() {
     auto node = std::make_unique<ForNode>(nullptr, nullptr, nullptr, nullptr);
 

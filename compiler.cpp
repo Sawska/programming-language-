@@ -122,6 +122,44 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
 }
 
     
+        case AST::Type::Access: {
+    auto AccessNode = dynamic_cast<ArrayAccessNode*>(node.get());
+    if (!AccessNode) {
+        throw std::runtime_error("Invalid node type for array access.");
+    }
+
+    auto result = evaluateAST(AccessNode->indexExpression);
+
+    if (std::holds_alternative<double>(result)) {
+        double index = std::get<double>(result);
+
+        std::string name = AccessNode->variableName;
+        
+        
+        VariableNode* varNode = dynamic_cast<VariableNode*>(findVariableInSymbolTableStack(name, *symbolTableStack.top()).get());
+        
+        if (!varNode) {
+            throw std::runtime_error("Variable not found in symbol table.");
+        }
+
+        ArrayNode* arrNode = dynamic_cast<ArrayNode*>(varNode->value.get());
+        if (!arrNode) {
+            throw std::runtime_error("Variable is not an array.");
+        }
+
+        
+        if (index < 0 || index >= arrNode->array.size()) {
+            throw std::out_of_range("Array index out of bounds.");
+        }
+
+
+        auto element = evaluateAST(arrNode->array[index]);
+        return element;
+
+    } else {
+        throw std::runtime_error("Index must be a number.");
+    }
+}
 
 
 
@@ -404,4 +442,44 @@ void Compiler::update_variable(const std::string& varName, ASTNodePtr node) {
         std::cerr << "Undefined variable: " << varName << std::endl;
         throw std::runtime_error("Undefined variable: " + varName);
     }
+}
+
+
+ASTNodePtr Compiler::findVariableInSymbolTableStack(const std::string& varName, SymbolTable& currentTable) {
+
+    ASTNodePtr variableValueNode = currentTable.getVariableValue(varName);
+
+    if (variableValueNode) {
+        return variableValueNode;
+    }
+
+
+    std::stack<std::unique_ptr<SymbolTable>> tempStack;
+    bool found = false;
+
+
+    while (!symbolTableStack.empty()) {
+        std::unique_ptr<SymbolTable> tempTable = std::move(symbolTableStack.top());
+        symbolTableStack.pop();
+        tempStack.push(std::move(tempTable));
+        variableValueNode = tempStack.top()->getVariableValue(varName);
+        
+        if (variableValueNode) {
+            found = true;
+            break;
+        }
+    }
+
+    
+    while (!tempStack.empty()) {
+        symbolTableStack.push(std::move(tempStack.top()));
+        tempStack.pop();
+    }
+
+    if (!found) {
+        std::cerr << "Undefined variable: " << varName << std::endl;
+        throw std::runtime_error("Undefined variable: " + varName);
+    }
+
+    return variableValueNode;
 }

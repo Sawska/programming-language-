@@ -22,6 +22,7 @@
 #include "ContinueNode.h"
 #include "ForNode.h"
 #include "ArrayNode.h"
+#include "ArrayAccessNode.h"
 
 class Parser {
 public:
