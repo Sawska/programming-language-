@@ -26,6 +26,8 @@ add_executable(PROGRAMMING_LANGUAGE
     BreakNode.cpp
     ForNode.cpp
     ArrayAccessNode.cpp
+    ArrayNode.cpp
+    FunctionNode.cpp
 )
 
 

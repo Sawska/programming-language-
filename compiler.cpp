@@ -161,7 +161,12 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
     }
 }
 
+        case AST::Type::Function: {
+            auto functionNode = dynamic_cast<FunctionNode*>(node.get());
+            if (!functionNode) throw std::runtime_error("Invalid function node");
+        return evaluateAST(functionNode->block);
 
+        }
 
         case AST::Type::BinaryOperation: {
            auto binaryfNode = dynamic_cast<BinaryOperationNode*>(node.get());

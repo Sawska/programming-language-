@@ -299,9 +299,34 @@ void Lexer::processChar(char c, std::ifstream &fileContent, std::vector<TOKEN> &
     buffer.push_back(c);
 
     
+    
+
+     while (fileContent.get(c) && (std::isalnum(c) || c == '_')) {
+    if (c == '(') {
+        state = LexerState::FunctionName;
+        buffer.push_back(c);
+        break;
+    }
+    buffer.push_back(c);
+}
+
+if (state == LexerState::FunctionName) {
+
     while (fileContent.get(c) && (std::isalnum(c) || c == '_')) {
         buffer.push_back(c);
     }
+
+
+    if (buffer.empty() || buffer.back() != ')') {
+        throw std::runtime_error("Can't have function caller without ')'");
+    }
+    
+
+    push_concept_token(TOKEN::TOKEN_CONCEPTS::FUNCTION_NAME);
+    return;
+}
+
+
 
     
     if (buffer == "let") {
@@ -315,7 +340,7 @@ void Lexer::processChar(char c, std::ifstream &fileContent, std::vector<TOKEN> &
     return;
 
     } else if (buffer == "function") {
-    
+        push_concept_token(TOKEN::TOKEN_CONCEPTS::FUNCTION);    
         return;
     } else if(buffer == "for")  {
     push_concept_token(TOKEN::TOKEN_CONCEPTS::FOR);    

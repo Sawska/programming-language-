@@ -29,10 +29,11 @@ class Compiler {
 public:
     Compiler(Lexer& lex) 
         : lexer(lex), 
-          parser(lexer.read_file(), std::move(lexer.table))
+          parser(lexer.read_file(), std::move(lexer.table),std::move(lexer.function_table))
     {
         root = parser.parse();
         symbolTableStack =  std::move(parser.symbolTableStack);
+        functionTableStack = std::move(parser.FunctionTableStack);
     }
 
     void run();
@@ -46,6 +47,7 @@ private:
     void REPL();
     ASTNodePtr findVariableInSymbolTableStack(const std::string& varName, SymbolTable& currentTable);
     std::stack<std::unique_ptr<SymbolTable>> symbolTableStack;
+    std::stack<std::unique_ptr<SymbolTable>> functionTableStack;
     std::stack<bool> loopStack; 
 };
 

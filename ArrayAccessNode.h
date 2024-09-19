@@ -7,12 +7,10 @@
 
 class ArrayAccessNode : public AST {
 public:
-    std::string variableName;     
-    ASTNodePtr indexExpression;   
-
+    std::string variableName;
+    ASTNodePtr indexExpression;
 
     ArrayAccessNode(std::string varName, ASTNodePtr indexExpr);
-
 
     std::unique_ptr<AST> clone() const override;
 };

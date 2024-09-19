@@ -30,7 +30,8 @@ public:
         Continue,
         FOR,
         Array,
-        Access
+        Access,
+        Function,
     };
 
     Type type;

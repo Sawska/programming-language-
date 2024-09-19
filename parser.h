@@ -23,6 +23,7 @@
 #include "ForNode.h"
 #include "ArrayNode.h"
 #include "ArrayAccessNode.h"
+#include "FunctionNode.h"
 
 class Parser {
 public:
@@ -30,9 +31,11 @@ public:
     Parser& operator=(Parser&&) = default; 
     
     
-    Parser(const std::vector<TOKEN>& tokens, SymbolTable&& table)
+    
+    Parser(const std::vector<TOKEN>& tokens, SymbolTable&& table,SymbolTable&& functionTable)
         : tokens(tokens), index(0)  {
             symbolTableStack.push(std::make_unique<SymbolTable>(std::move(table)));
+            FunctionTableStack.push(std::make_unique<SymbolTable>(std::move(functionTable)));
         }
 
     ASTNodePtr parse();
@@ -48,11 +51,15 @@ public:
     ASTNodePtr parseWhile();
     ASTNodePtr parseReturn();
     std::stack<std::unique_ptr<SymbolTable>> symbolTableStack;
+    std::stack<std::unique_ptr<SymbolTable>> FunctionTableStack;
     ASTNodePtr findVariableInSymbolTableStack(const std::string& varName, SymbolTable& currentTable);
     ASTNodePtr parseContinue();
     ASTNodePtr parseBreak();
     ASTNodePtr parseFor();
     ASTNodePtr parseArray();
+    ASTNodePtr parseFunction();
+    ASTNodePtr handleFunctionRefrence();
+    ASTNodePtr findFunctionInSymbolTableStack(const std::string& functionName, SymbolTable& currentTable);
 
 
 private:

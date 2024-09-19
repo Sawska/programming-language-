@@ -19,6 +19,7 @@ class Lexer {
     Lexer& operator=(Lexer&&) = default; 
     std::vector<TOKEN> read_file();
     SymbolTable table;
+    SymbolTable function_table;
     private:
     void processOperator(char c, std::ifstream &fileContent, std::vector<TOKEN> &result);
     bool check_if_number(char c);
@@ -53,6 +54,7 @@ enum class LexerState {
     ElseStatement,
     IfStatement,
     ForLoop,
+    FunctionName,
 };
 
 

@@ -167,7 +167,11 @@ ASTNodePtr Parser::parseFactor() {
         return parseIf();
     } else if(token.concept == TOKEN::TOKEN_CONCEPTS::RETURN) {
         return parseReturn();
-    } 
+    }  else if(token.concept == TOKEN::TOKEN_CONCEPTS::FUNCTION) {
+        parseFunction();
+    } else if(token.concept == TOKEN::TOKEN_CONCEPTS::FUNCTION_NAME) {
+
+    }
     else {
         std::cerr << "Unexpected token: " << token.op << " at index: " << index << std::endl;
         throw std::runtime_error("Unexpected token: " + std::to_string(token.op));
@@ -190,7 +194,14 @@ ASTNodePtr Parser::parseVariableOrAssignment() {
 
     if (index < tokens.size() && tokens[index].op == TOKEN::OPERATORS::EQUALS_OPERATOR) {
         index++;
-        auto expr = parseExpression();
+        ASTNodePtr expr;
+        if(tokens[index].concept == TOKEN::TOKEN_CONCEPTS::FUNCTION) {
+            index++;
+            expr = parseBlock();
+        } else {
+
+        expr = parseExpression();
+        }
 
         if (index < tokens.size() && tokens[index].op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
             index++;
@@ -562,4 +573,130 @@ ASTNodePtr Parser::parseArray()
     }
 
     return arrayNode;
+}
+
+
+ASTNodePtr Parser::parseFunction() {
+    if (index >= tokens.size() || tokens[index].concept != TOKEN::TOKEN_CONCEPTS::FUNCTION_NAME) {
+        std::cerr << "Expected function name but got a different token" << std::endl;
+        throw std::runtime_error("Expected function name");
+    }
+
+    SymbolTable& currentTable = *FunctionTableStack.top();
+
+    const TOKEN& token = tokens[index];
+    std::string functionName = token.variableName;
+    index++;
+
+    if (index < tokens.size() && tokens[index].concept == TOKEN::TOKEN_CONCEPTS::BLOCK) {
+        auto expr = parseBlock();
+        currentTable.setVariableValue(functionName, std::move(expr));
+        return AST::makeEmptyNode();
+    } else {
+        throw std::runtime_error("Expected function name");
+    }
+    return AST::makeEmptyNode();
+}
+
+ASTNodePtr Parser::handleFunctionRefrence() {
+    if (index >= tokens.size()) {
+        throw std::runtime_error("Unexpected end of tokens");
+    }
+    SymbolTable& currentTable = *FunctionTableStack.top();
+    const TOKEN& token = tokens[index];
+    std::string functionName = token.variableName;
+
+    if (token.concept != TOKEN::TOKEN_CONCEPTS::FUNCTION_NAME) {
+        throw std::runtime_error("Expected function name");
+    }
+
+    ASTNodePtr functionNode = findFunctionInSymbolTableStack(functionName, currentTable);
+
+    
+    if (!functionNode) {
+        std::cerr << "Undefined function: " << functionName << std::endl;
+        throw std::runtime_error("Undefined function: " + functionName);
+    }
+
+
+    return std::make_unique<FunctionNode>(functionName, std::move(functionNode));
+}
+
+
+ASTNodePtr Parser::findVariableInSymbolTableStack(const std::string& varName, SymbolTable& currentTable) {
+
+    ASTNodePtr variableValueNode = currentTable.getVariableValue(varName);
+
+    if (variableValueNode) {
+        return variableValueNode;
+    }
+
+
+    std::stack<std::unique_ptr<SymbolTable>> tempStack;
+    bool found = false;
+
+
+    while (!symbolTableStack.empty()) {
+        std::unique_ptr<SymbolTable> tempTable = std::move(symbolTableStack.top());
+        symbolTableStack.pop();
+        tempStack.push(std::move(tempTable));
+        variableValueNode = tempStack.top()->getVariableValue(varName);
+        
+        if (variableValueNode) {
+            found = true;
+            break;
+        }
+    }
+
+    
+    while (!tempStack.empty()) {
+        symbolTableStack.push(std::move(tempStack.top()));
+        tempStack.pop();
+    }
+
+    if (!found) {
+        std::cerr << "Undefined variable: " << varName << std::endl;
+        throw std::runtime_error("Undefined variable: " + varName);
+    }
+
+    return variableValueNode;
+}
+
+ASTNodePtr Parser::findFunctionInSymbolTableStack(const std::string& functionName, SymbolTable& currentTable) {
+
+    ASTNodePtr functionNode = currentTable.getVariableValue(functionName);
+
+    if (functionNode) {
+        return functionNode;
+    }
+
+
+    std::stack<std::unique_ptr<SymbolTable>> tempStack;
+    bool found = false;
+
+
+    while (!FunctionTableStack.empty()) {
+        std::unique_ptr<SymbolTable> tempTable = std::move(FunctionTableStack.top());
+        symbolTableStack.pop();
+        tempStack.push(std::move(tempTable));
+        functionNode = tempStack.top()->getVariableValue(functionName);
+        
+        if (functionNode) {
+            found = true;
+            break;
+        }
+    }
+
+    
+    while (!tempStack.empty()) {
+        FunctionTableStack.push(std::move(tempStack.top()));
+        tempStack.pop();
+    }
+
+    if (!found) {
+        std::cerr << "Undefined variable: " << functionName << std::endl;
+        throw std::runtime_error("Undefined variable: " + functionName);
+    }
+
+    return functionNode;
 }

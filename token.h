@@ -66,6 +66,8 @@ struct TOKEN
         SEMICOLON,
         FOR,
         COMMA,
+        FUNCTION,
+        FUNCTION_NAME,
     };
 
 
