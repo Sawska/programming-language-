@@ -132,7 +132,6 @@ ASTNodePtr Parser::parseFactor() {
     } else if (token.concept == TOKEN::TOKEN_CONCEPTS::OPEN_CIRCLE_BRACKETS) {
         index++;
         auto expr = parseExpression();
-
         if (index >= tokens.size() || tokens[index].concept != TOKEN::TOKEN_CONCEPTS::CLOSE_CIRCLE_BRACKETS) {
             throw std::runtime_error("Mismatched parentheses");
         }
@@ -168,9 +167,11 @@ ASTNodePtr Parser::parseFactor() {
     } else if(token.concept == TOKEN::TOKEN_CONCEPTS::RETURN) {
         return parseReturn();
     }  else if(token.concept == TOKEN::TOKEN_CONCEPTS::FUNCTION) {
-        parseFunction();
+        return parseFunction();
     } else if(token.concept == TOKEN::TOKEN_CONCEPTS::FUNCTION_NAME) {
-
+        return handleFunctionRefrence();
+    } else if(token.concept == TOKEN::TOKEN_CONCEPTS::CLASS) {
+        
     }
     else {
         std::cerr << "Unexpected token: " << token.op << " at index: " << index << std::endl;
@@ -529,29 +530,22 @@ ASTNodePtr Parser::parseArray()
 {
     std::vector<ASTNodePtr> array;
 
-    
     while (index < tokens.size() && tokens[index].concept != TOKEN::TOKEN_CONCEPTS::CLOSE_SQUARE_BRACKETS)
     {
-        auto expression = parseLogicalExpression();
-        array.push_back(expression);
+        ASTNodePtr expression = parseLogicalExpression();
+        array.push_back(std::move(expression));
 
-        
         if (index < tokens.size() && tokens[index].concept == TOKEN::TOKEN_CONCEPTS::COMMA)
         {
             ++index;
         }
     }
-
     if (index >= tokens.size() || tokens[index].concept != TOKEN::TOKEN_CONCEPTS::CLOSE_SQUARE_BRACKETS) {
         throw std::runtime_error("Expected closing square bracket.");
     }
-
     ++index;
+    ASTNodePtr arrayNode = std::make_unique<ArrayNode>(std::move(array));
 
-
-    auto arrayNode = std::make_unique<ArrayNode>(array);
-
- 
     bool containsWhileNode = false;
     bool containsForNode = false;
 
@@ -565,11 +559,11 @@ ASTNodePtr Parser::parseArray()
     }
 
     if (containsWhileNode) {
-            throw std::runtime_error("Can't have while");
+        throw std::runtime_error("Can't have while");
     }
 
     if (containsForNode) {
-            throw std::runtime_error("Can't have for");
+        throw std::runtime_error("Can't have for");
     }
 
     return arrayNode;
@@ -619,7 +613,7 @@ ASTNodePtr Parser::handleFunctionRefrence() {
     }
 
 
-    return std::make_unique<FunctionNode>(functionName, std::move(functionNode));
+    return std::make_unique<FunctionNode>(std::move(functionNode),functionName);
 }
 
 

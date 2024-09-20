@@ -20,6 +20,7 @@ class Lexer {
     std::vector<TOKEN> read_file();
     SymbolTable table;
     SymbolTable function_table;
+    SymbolTable class_table;
     private:
     void processOperator(char c, std::ifstream &fileContent, std::vector<TOKEN> &result);
     bool check_if_number(char c);

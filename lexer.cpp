@@ -355,8 +355,30 @@ if (state == LexerState::FunctionName) {
 } else if (buffer == "else") {
     push_concept_token(TOKEN::TOKEN_CONCEPTS::ELSE);
     return;
-    } else if(buffer == "class") {
+    } 
+    else if(buffer == "class") {
+        TOKEN token;
+        push_concept_token(TOKEN::TOKEN_CONCEPTS::CLASS);
+        while (fileContent.get(c) && (std::isalnum(c) || c == '_')) {
+        buffer.push_back(c);
+        }
 
+        token.variableName = buffer;
+        token.concept == TOKEN::TOKEN_CONCEPTS::CLASS_NAME;
+        buffer.clear();
+        result.push_back(token);
+    } else if(buffer == "new")
+    {
+        TOKEN token;
+        push_concept_token(TOKEN::TOKEN_CONCEPTS::NEW);
+        while (fileContent.get(c) && (std::isalnum(c) || c == '_')) {
+        buffer.push_back(c);
+        }
+
+        token.variableName = buffer;
+        token.concept == TOKEN::TOKEN_CONCEPTS::CLASS_NAME;
+        buffer.clear();
+        result.push_back(token);
     }
     else if (buffer == "break") {
         TOKEN tok;

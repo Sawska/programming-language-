@@ -68,6 +68,9 @@ struct TOKEN
         COMMA,
         FUNCTION,
         FUNCTION_NAME,
+        CLASS,
+        CLASS_NAME,
+        NEW
     };
 
 

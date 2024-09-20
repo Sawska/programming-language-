@@ -32,10 +32,11 @@ public:
     
     
     
-    Parser(const std::vector<TOKEN>& tokens, SymbolTable&& table,SymbolTable&& functionTable)
+    Parser(const std::vector<TOKEN>& tokens, SymbolTable&& table,SymbolTable&& functionTable,SymbolTable&& classTable)
         : tokens(tokens), index(0)  {
             symbolTableStack.push(std::make_unique<SymbolTable>(std::move(table)));
             FunctionTableStack.push(std::make_unique<SymbolTable>(std::move(functionTable)));
+            classTableStack.push(std::make_unique<SymbolTable>(std::move(classTable)));
         }
 
     ASTNodePtr parse();
@@ -52,6 +53,7 @@ public:
     ASTNodePtr parseReturn();
     std::stack<std::unique_ptr<SymbolTable>> symbolTableStack;
     std::stack<std::unique_ptr<SymbolTable>> FunctionTableStack;
+    std::stack<std::unique_ptr<SymbolTable>> classTableStack;
     ASTNodePtr findVariableInSymbolTableStack(const std::string& varName, SymbolTable& currentTable);
     ASTNodePtr parseContinue();
     ASTNodePtr parseBreak();
