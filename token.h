@@ -70,7 +70,9 @@ struct TOKEN
         FUNCTION_NAME,
         CLASS,
         CLASS_NAME,
-        NEW
+        NEW,
+        TRUE,
+        FALSE,
     };
 
 

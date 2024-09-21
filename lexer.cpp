@@ -352,7 +352,13 @@ if (state == LexerState::FunctionName) {
     } else if (buffer == "if") {
     push_concept_token(TOKEN::TOKEN_CONCEPTS::IF);
     return;
-} else if (buffer == "else") {
+}  else if(buffer == "true")
+{
+    push_concept_token(TOKEN::TOKEN_CONCEPTS::TRUE);
+} else if(buffer == "false") {
+    push_concept_token(TOKEN::TOKEN_CONCEPTS::FALSE);
+}
+else if (buffer == "else") {
     push_concept_token(TOKEN::TOKEN_CONCEPTS::ELSE);
     return;
     } 
@@ -364,7 +370,7 @@ if (state == LexerState::FunctionName) {
         }
 
         token.variableName = buffer;
-        token.concept == TOKEN::TOKEN_CONCEPTS::CLASS_NAME;
+        token.concept = TOKEN::TOKEN_CONCEPTS::CLASS_NAME;
         buffer.clear();
         result.push_back(token);
     } else if(buffer == "new")

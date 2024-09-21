@@ -32,6 +32,7 @@ public:
         Array,
         Access,
         Function,
+        Bool
     };
 
     Type type;

@@ -24,6 +24,7 @@
 #include "ArrayNode.h"
 #include "ArrayAccessNode.h"
 #include "FunctionNode.h"
+#include "BoolNode.h"
 
 class Parser {
 public:

@@ -24,7 +24,7 @@ struct ReturnType {
 };
 
 #define ISREPL 0
-using ASTResult = std::variant<double, std::string, ContinueType, BreakType, ReturnType,VoidType>;
+using ASTResult = std::variant<double, std::string, ContinueType, BreakType, ReturnType,VoidType,bool>;
 class Compiler {
 public:
     Compiler(Lexer& lex) 
@@ -40,6 +40,7 @@ public:
     void run();
     ASTResult evaluateAST(const ASTNodePtr& node);
     void update_variable(const std::string& varName, ASTNodePtr node);
+    ASTNodePtr find_variable_value(const std::string& varName);
 
 private:
     Lexer& lexer;

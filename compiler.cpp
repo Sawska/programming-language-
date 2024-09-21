@@ -20,11 +20,12 @@ void Compiler::REPL() {
         std::cout << std::get<double>(result) << std::endl;
     } else if (std::holds_alternative<std::string>(result)) {
         std::cout << std::get<std::string>(result) << std::endl;
-    } else if(std::holds_alternative<ReturnType>(result))
-    {
-        ReturnType retr =  std::move(std::get<ReturnType>(result));
-        
-    } else if(std::holds_alternative<BreakType>(result))
+    }else if (std::holds_alternative<ReturnType>(result)) {
+
+    } else if(std::holds_alternative<bool>(result)) {
+        std::cout << std::get<bool>(result) << std::endl;
+    }
+     else if(std::holds_alternative<BreakType>(result))
     {
 
     } else if(std::holds_alternative<ContinueType>(result)) {
@@ -142,7 +143,10 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
             throw std::runtime_error("Variable not found in symbol table.");
         }
 
-        ArrayNode* arrNode = dynamic_cast<ArrayNode*>(varNode->value.get());
+        
+        
+        
+        ArrayNode* arrNode = dynamic_cast<ArrayNode*>(find_variable_value(varNode->name).get());
         if (!arrNode) {
             throw std::runtime_error("Variable is not an array.");
         }
@@ -176,6 +180,7 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
             }
 
             auto leftValue = evaluateAST(binaryfNode->left);
+            auto leftVar = dynamic_cast<VariableNode*>(binaryfNode->left.get());
             auto rightValue = evaluateAST(binaryfNode->right);
 
             if (binaryfNode->op == TOKEN::OPERATORS::PLUS_OPERATOR) {
@@ -235,6 +240,36 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
                     return static_cast<double>(static_cast<int>(leftNum) & static_cast<int>(rightNum));
                 case TOKEN::OPERATORS::BIT_OR_OPERATOR:
                     return static_cast<double>(static_cast<int>(leftNum) | static_cast<int>(rightNum));
+                case TOKEN::OPERATORS::EQUAL_DIVIDE_OPERATOR: {
+                    if (rightNum == 0) throw std::runtime_error("Division by zero");
+                    auto res =  leftNum / rightNum;
+                    if(leftVar) {
+                        update_variable(leftVar->name,AST::makeNumberNode(res));
+                    }
+                    return res;
+                }
+                case TOKEN::OPERATORS::EQUAL_MINUS_OPERATOR: {
+                    auto res =  leftNum - rightNum;
+                        if(leftVar) {
+                            update_variable(leftVar->name,AST::makeNumberNode(res));
+                        }
+                    return res;
+                }
+
+                case TOKEN::OPERATORS::EQUAL_MULTIPLY_OPERATOR: {
+                    auto res =  leftNum * rightNum;
+                        if(leftVar) {
+                            update_variable(leftVar->name,AST::makeNumberNode(res));
+                        }
+                    return res;
+                }
+                case TOKEN::OPERATORS::EQUAL_PLUS_OPERATOR: {
+                    auto res =  leftNum + rightNum;
+                        if(leftVar) {
+                            update_variable(leftVar->name,AST::makeNumberNode(res));
+                        }
+                    return res;
+                }
                 default:
                     throw std::runtime_error("Unsupported binary operator");
             }
@@ -262,6 +297,11 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
         throw std::runtime_error("Condition in if statement did not evaluate to a boolean.");
     }
 }
+
+    case AST::Type::Bool: {
+        auto boolNode = dynamic_cast<BoolNode*>(node.get());
+        return boolNode->value;
+    }
 
 
 
@@ -328,18 +368,18 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
             
             
             if (std::holds_alternative<BreakType>(result)) {
-                return VoidType{};          
                 break;
             }
             if (std::holds_alternative<ReturnType>(result)) {
                 loopStack.pop();
-                return result;
+                ReturnType retr = std::move(std::get<ReturnType>(result));
+                return evaluateAST(retr.returnValue);
             }
             if (std::holds_alternative<ContinueType>(result)) {
                 continue;
             }
         }
-        loopStack.pop(); 
+        
         return VoidType{};
     }
 }
@@ -364,12 +404,13 @@ case AST::Type::FOR: {
 
             
             if (std::holds_alternative<BreakType>(result)) {
-                return VoidType{};          
+                loopStack.pop();
                 break;
             }
             if (std::holds_alternative<ReturnType>(result)) {
                 loopStack.pop();
-                return result;
+                ReturnType retr = std::move(std::get<ReturnType>(result));
+                return evaluateAST(retr.returnValue);
             }
             if (std::holds_alternative<ContinueType>(result)) {
             
@@ -385,7 +426,6 @@ case AST::Type::FOR: {
             std::cout << "" << std::endl;
         }
 
-        loopStack.pop();
         return VoidType{};  
     }
 }
@@ -401,7 +441,7 @@ case AST::Type::FOR: {
         case AST::Type::Variable: {
     auto varNode = dynamic_cast<VariableNode*>(node.get());
     if (!varNode) throw std::runtime_error("Invalid variable node");
-    return evaluateAST(varNode->value);
+    return evaluateAST(find_variable_value(varNode->name));
 }
 
 
@@ -412,20 +452,17 @@ case AST::Type::FOR: {
 
 
 void Compiler::update_variable(const std::string& varName, ASTNodePtr node) {
-    
     std::stack<std::unique_ptr<SymbolTable>> tempStack;
     bool found = false;
 
-    
+
     while (!symbolTableStack.empty()) {
-        
         SymbolTable* currentTable = symbolTableStack.top().get();
-        
-        
+
         ASTNodePtr variableValueNode = currentTable->getVariableValue(varName);
 
         if (variableValueNode) {
-            
+
             currentTable->setVariableValue(varName, std::move(node));
             found = true;
             break;
@@ -448,6 +485,7 @@ void Compiler::update_variable(const std::string& varName, ASTNodePtr node) {
         throw std::runtime_error("Undefined variable: " + varName);
     }
 }
+
 
 
 ASTNodePtr Compiler::findVariableInSymbolTableStack(const std::string& varName, SymbolTable& currentTable) {
@@ -484,6 +522,36 @@ ASTNodePtr Compiler::findVariableInSymbolTableStack(const std::string& varName, 
     if (!found) {
         std::cerr << "Undefined variable: " << varName << std::endl;
         throw std::runtime_error("Undefined variable: " + varName);
+    }
+
+    return variableValueNode;
+}
+
+
+ASTNodePtr Compiler::find_variable_value(const std::string& varName) {
+    std::stack<std::unique_ptr<SymbolTable>> tempStack;
+    ASTNodePtr variableValueNode;
+
+    while (!symbolTableStack.empty()) {
+        SymbolTable* currentTable = symbolTableStack.top().get();
+        
+
+        variableValueNode = currentTable->getVariableValue(varName);
+
+        if (variableValueNode) {
+            
+            break;
+        }
+
+        
+        tempStack.push(std::move(symbolTableStack.top()));
+        symbolTableStack.pop();
+    }
+
+    
+    while (!tempStack.empty()) {
+        symbolTableStack.push(std::move(tempStack.top()));
+        tempStack.pop();
     }
 
     return variableValueNode;

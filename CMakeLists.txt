@@ -28,6 +28,7 @@ add_executable(PROGRAMMING_LANGUAGE
     ArrayAccessNode.cpp
     ArrayNode.cpp
     FunctionNode.cpp
+    BoolNode.cpp
 )
 
 

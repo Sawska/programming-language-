@@ -129,7 +129,12 @@ ASTNodePtr Parser::parseFactor() {
     } else if (token.concept == TOKEN::TOKEN_CONCEPTS::STRING) {
         index++;
         return AST::makeStringNode(token.string);
-    } else if (token.concept == TOKEN::TOKEN_CONCEPTS::OPEN_CIRCLE_BRACKETS) {
+    }  else if(token.concept == TOKEN::TOKEN_CONCEPTS::TRUE) {
+        return std::make_unique<BoolNode>(true);
+    } else if(token.concept == TOKEN::TOKEN_CONCEPTS::FALSE) {
+        return std::make_unique<BoolNode>(false);
+    }
+    else if (token.concept == TOKEN::TOKEN_CONCEPTS::OPEN_CIRCLE_BRACKETS) {
         index++;
         auto expr = parseExpression();
         if (index >= tokens.size() || tokens[index].concept != TOKEN::TOKEN_CONCEPTS::CLOSE_CIRCLE_BRACKETS) {
