@@ -122,6 +122,18 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
     }
 }
 
+    case AST::Type::Array: {
+    auto arrayNode = dynamic_cast<ArrayNode*>(node.get());
+    if (!arrayNode) {
+        throw std::runtime_error("Invalid node type for array.");
+    }
+
+
+    return std::move(arrayNode->array);
+    
+}
+
+
     
         case AST::Type::Access: {
     auto AccessNode = dynamic_cast<ArrayAccessNode*>(node.get());
@@ -133,25 +145,25 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
 
     if (std::holds_alternative<double>(result)) {
         double index = std::get<double>(result);
-
         std::string name = AccessNode->variableName;
+
+
+        auto varPtr = findVariableInSymbolTableStack(name, *symbolTableStack.top());
         
-        
-        VariableNode* varNode = dynamic_cast<VariableNode*>(findVariableInSymbolTableStack(name, *symbolTableStack.top()).get());
-        
-        if (!varNode) {
-            throw std::runtime_error("Variable not found in symbol table.");
-        }
+
+        // if (!varNode) {
+        //     throw std::runtime_error("Variable not found in symbol table.");
+        // }
+
 
         
-        
-        
-        ArrayNode* arrNode = dynamic_cast<ArrayNode*>(find_variable_value(varNode->name).get());
+        ArrayNode* arrNode = dynamic_cast<ArrayNode*>(varPtr.get());
+
         if (!arrNode) {
             throw std::runtime_error("Variable is not an array.");
         }
 
-        
+
         if (index < 0 || index >= arrNode->array.size()) {
             throw std::out_of_range("Array index out of bounds.");
         }
@@ -164,6 +176,7 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
         throw std::runtime_error("Index must be a number.");
     }
 }
+
 
         case AST::Type::Function: {
             auto functionNode = dynamic_cast<FunctionNode*>(node.get());

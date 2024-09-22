@@ -5,8 +5,9 @@
 #include "AST.h"
 
 class BoolNode : public AST {
+public:
     bool type;
-    BoolNode::BoolNode(bool type);
+    BoolNode(bool type);
     std::unique_ptr<AST> clone() const override;
 };
 

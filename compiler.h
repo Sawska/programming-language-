@@ -4,6 +4,7 @@
 #include "lexer.h"
 #include "parser.h" 
 #include "SymbolTable.h"
+#include "vector"
 
 struct ContinueType {
 
@@ -24,7 +25,7 @@ struct ReturnType {
 };
 
 #define ISREPL 0
-using ASTResult = std::variant<double, std::string, ContinueType, BreakType, ReturnType,VoidType,bool>;
+using ASTResult = std::variant<double, std::string, ContinueType, BreakType, ReturnType,VoidType,bool,std::vector<ASTNodePtr>>;
 class Compiler {
 public:
     Compiler(Lexer& lex) 

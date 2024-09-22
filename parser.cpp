@@ -144,7 +144,7 @@ ASTNodePtr Parser::parseFactor() {
         return expr;
     } else if(token.concept == TOKEN::TOKEN_CONCEPTS::OPEN_SQUARE_BRACKETS)  {
         index++;
-        parseArray();
+        return parseArray();
     }
     else if(token.concept == TOKEN::TOKEN_CONCEPTS::FOR)  {
         index++;
@@ -300,6 +300,15 @@ ASTNodePtr Parser::handleVariableReference() {
             index++;
         } else if(tokens[index].concept == TOKEN::TOKEN_CONCEPTS::OPEN_SQUARE_BRACKETS)
         {
+            index++;
+            ASTNodePtr indexExpr = parseLogicalExpression();
+            index++;
+            if(tokens[index].concept != TOKEN::TOKEN_CONCEPTS::CLOSE_SQUARE_BRACKETS) {
+                std::runtime_error("Need '['");
+            }
+            
+            return std::make_unique<ArrayAccessNode>(varName,std::move(indexExpr));
+            
             
         }
         return AST::makeEmptyNode();
@@ -576,6 +585,7 @@ ASTNodePtr Parser::parseArray()
 
 
 ASTNodePtr Parser::parseFunction() {
+    index++;
     if (index >= tokens.size() || tokens[index].concept != TOKEN::TOKEN_CONCEPTS::FUNCTION_NAME) {
         std::cerr << "Expected function name but got a different token" << std::endl;
         throw std::runtime_error("Expected function name");
@@ -587,7 +597,7 @@ ASTNodePtr Parser::parseFunction() {
     std::string functionName = token.variableName;
     index++;
 
-    if (index < tokens.size() && tokens[index].concept == TOKEN::TOKEN_CONCEPTS::BLOCK) {
+    if (index < tokens.size() && tokens[index].concept == TOKEN::TOKEN_CONCEPTS::OPEN_BRACKETS) {
         auto expr = parseBlock();
         currentTable.setVariableValue(functionName, std::move(expr));
         return AST::makeEmptyNode();
@@ -699,3 +709,4 @@ ASTNodePtr Parser::findFunctionInSymbolTableStack(const std::string& functionNam
 
     return functionNode;
 }
+

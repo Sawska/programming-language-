@@ -114,6 +114,7 @@ bool Lexer::check_if_operator(char c) {
         case '(':
         case ')':
         case ';':
+        case ',':
             return true;
         default:
             return false;
@@ -270,6 +271,10 @@ void Lexer::processOperator(char c, std::ifstream &fileContent, std::vector<TOKE
             tok.concept = TOKEN::TOKEN_CONCEPTS::SEMICOLON;
             result.push_back(tok);
             break;
+        case ',':
+            tok.concept = TOKEN::TOKEN_CONCEPTS::COMMA;
+            result.push_back(tok);
+            break;
         default:
             std::cerr << "Unexpected character encountered: " << c << std::endl;
     }
@@ -302,30 +307,8 @@ void Lexer::processChar(char c, std::ifstream &fileContent, std::vector<TOKEN> &
     
 
      while (fileContent.get(c) && (std::isalnum(c) || c == '_')) {
-    if (c == '(') {
-        state = LexerState::FunctionName;
-        buffer.push_back(c);
-        break;
-    }
     buffer.push_back(c);
 }
-
-if (state == LexerState::FunctionName) {
-
-    while (fileContent.get(c) && (std::isalnum(c) || c == '_')) {
-        buffer.push_back(c);
-    }
-
-
-    if (buffer.empty() || buffer.back() != ')') {
-        throw std::runtime_error("Can't have function caller without ')'");
-    }
-    
-
-    push_concept_token(TOKEN::TOKEN_CONCEPTS::FUNCTION_NAME);
-    return;
-}
-
 
 
     
@@ -340,7 +323,18 @@ if (state == LexerState::FunctionName) {
     return;
 
     } else if (buffer == "function") {
+        TOKEN token;
         push_concept_token(TOKEN::TOKEN_CONCEPTS::FUNCTION);    
+        buffer.clear();
+        while( fileContent.get(c) && isspace(c)) {}
+        fileContent.unget();
+        while (fileContent.get(c) && (std::isalnum(c) || c == '_')) {
+            buffer.push_back(c);
+        }
+        fileContent.unget();
+        token.variableName = buffer;
+        token.concept = TOKEN::TOKEN_CONCEPTS::FUNCTION_NAME;
+        result.push_back(token);
         return;
     } else if(buffer == "for")  {
     push_concept_token(TOKEN::TOKEN_CONCEPTS::FOR);    
@@ -382,7 +376,7 @@ else if (buffer == "else") {
         }
 
         token.variableName = buffer;
-        token.concept == TOKEN::TOKEN_CONCEPTS::CLASS_NAME;
+        token.concept = TOKEN::TOKEN_CONCEPTS::CLASS_NAME;
         buffer.clear();
         result.push_back(token);
     }

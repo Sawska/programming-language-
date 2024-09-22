@@ -62,6 +62,7 @@ public:
     ASTNodePtr parseArray();
     ASTNodePtr parseFunction();
     ASTNodePtr handleFunctionRefrence();
+    ASTNodePtr handleArrayRefence();
     ASTNodePtr findFunctionInSymbolTableStack(const std::string& functionName, SymbolTable& currentTable);
 
 
