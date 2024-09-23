@@ -176,7 +176,7 @@ ASTNodePtr Parser::parseFactor() {
     } else if(token.concept == TOKEN::TOKEN_CONCEPTS::FUNCTION_NAME) {
         return handleFunctionRefrence();
     } else if(token.concept == TOKEN::TOKEN_CONCEPTS::CLASS) {
-        
+        parseClass();
     }
     else {
         std::cerr << "Unexpected token: " << token.op << " at index: " << index << std::endl;
@@ -257,6 +257,11 @@ ASTNodePtr Parser::parseBlock() {
 ASTNodePtr Parser::handleVariableReference() {
     if (index >= tokens.size()) {
         throw std::runtime_error("Unexpected end of tokens");
+    }
+
+    index++;
+    if(index < tokens.size() && tokens[index].concept == TOKEN::TOKEN_CONCEPTS::OPEN_CIRCLE_BRACKETS) {
+        return handleFunctionRefrence();
     }
 
     SymbolTable& currentTable = *symbolTableStack.top();
@@ -596,10 +601,20 @@ ASTNodePtr Parser::parseFunction() {
     const TOKEN& token = tokens[index];
     std::string functionName = token.variableName;
     index++;
+    std::vector<ASTNodePtr> argument_list;
+
+    if(index<tokens.size() && tokens[index].concept == TOKEN::TOKEN_CONCEPTS::OPEN_CIRCLE_BRACKETS) {
+        index++;
+        while(index<tokens.size() && tokens[index].concept != TOKEN::TOKEN_CONCEPTS::CLOSE_CIRCLE_BRACKETS) {
+            auto var = parseLogicalExpression();
+            argument_list.push_back(std::move(var));
+        }
+    }
+    index++;
 
     if (index < tokens.size() && tokens[index].concept == TOKEN::TOKEN_CONCEPTS::OPEN_BRACKETS) {
-        auto expr = parseBlock();
-        currentTable.setVariableValue(functionName, std::move(expr));
+        ASTNodePtr expr = parseBlock();
+        currentTable.setVariableValue(functionName, std::make_unique<FunctionNode>(std::move(expr), functionName, std::move(argument_list)));
         return AST::makeEmptyNode();
     } else {
         throw std::runtime_error("Expected function name");
@@ -615,11 +630,17 @@ ASTNodePtr Parser::handleFunctionRefrence() {
     const TOKEN& token = tokens[index];
     std::string functionName = token.variableName;
 
-    if (token.concept != TOKEN::TOKEN_CONCEPTS::FUNCTION_NAME) {
-        throw std::runtime_error("Expected function name");
-    }
+    std::vector<ASTNodePtr> argument_list;
 
-    ASTNodePtr functionNode = findFunctionInSymbolTableStack(functionName, currentTable);
+    
+        index++;
+        while(index<tokens.size() && tokens[index].concept != TOKEN::TOKEN_CONCEPTS::CLOSE_CIRCLE_BRACKETS) {
+            auto var = parseLogicalExpression();
+            argument_list.push_back(std::move(var));
+        }
+
+    FunctionNode* functionNode = dynamic_cast<FunctionNode*>(findFunctionInSymbolTableStack(functionName, currentTable).get());
+
 
     
     if (!functionNode) {
@@ -628,7 +649,7 @@ ASTNodePtr Parser::handleFunctionRefrence() {
     }
 
 
-    return std::make_unique<FunctionNode>(std::move(functionNode),functionName);
+    return std::make_unique<FunctionNode>(std::move(functionNode->block), functionName, std::move(argument_list));
 }
 
 
@@ -710,3 +731,15 @@ ASTNodePtr Parser::findFunctionInSymbolTableStack(const std::string& functionNam
     return functionNode;
 }
 
+ASTNodePtr Parser::parseClass()
+{
+    index++;
+    if(tokens[index].concept != TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME)
+    {
+        std::runtime_error("need name after class");
+    }
+
+    std::string name = tokens[index].variableName;
+
+    
+}

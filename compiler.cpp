@@ -151,9 +151,7 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
         auto varPtr = findVariableInSymbolTableStack(name, *symbolTableStack.top());
         
 
-        // if (!varNode) {
-        //     throw std::runtime_error("Variable not found in symbol table.");
-        // }
+        
 
 
         
@@ -179,11 +177,34 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
 
 
         case AST::Type::Function: {
-            auto functionNode = dynamic_cast<FunctionNode*>(node.get());
-            if (!functionNode) throw std::runtime_error("Invalid function node");
-        return evaluateAST(functionNode->block);
+    auto functionNode = dynamic_cast<FunctionNode*>(node.get());
+    
 
+    auto table = std::make_unique<SymbolTable>();
+    
+    for (int i = 0; i < functionNode->argument_list.size(); i++) {
+        auto val = dynamic_cast<VariableNode*>(functionNode->argument_list[i].get());
+        if (val) {
+            
+            table->setVariableValue(val->name, std::move(functionNode->argument_list[i])); 
+        } else {
+            throw std::runtime_error("Invalid variable node");
         }
+    }
+    
+    if (!functionNode) {
+        throw std::runtime_error("Invalid function node");
+    }
+
+
+    symbolTableStack.push(std::move(table));
+
+    auto res= evaluateAST(functionNode->block);
+    symbolTableStack.pop();
+    return res;
+}
+
+
 
         case AST::Type::BinaryOperation: {
            auto binaryfNode = dynamic_cast<BinaryOperationNode*>(node.get());
@@ -314,6 +335,10 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
     case AST::Type::Bool: {
         auto boolNode = dynamic_cast<BoolNode*>(node.get());
         return boolNode->value;
+    }
+
+    case AST::Type::Class: {
+        return VoidType{};
     }
 
 
@@ -568,4 +593,6 @@ ASTNodePtr Compiler::find_variable_value(const std::string& varName) {
     }
 
     return variableValueNode;
+
+
 }

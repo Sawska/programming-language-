@@ -115,6 +115,7 @@ bool Lexer::check_if_operator(char c) {
         case ')':
         case ';':
         case ',':
+        case ':':
             return true;
         default:
             return false;
@@ -275,6 +276,10 @@ void Lexer::processOperator(char c, std::ifstream &fileContent, std::vector<TOKE
             tok.concept = TOKEN::TOKEN_CONCEPTS::COMMA;
             result.push_back(tok);
             break;
+        case ':':
+        tok.concept = TOKEN::TOKEN_CONCEPTS::EXTENDS;
+        result.push_back(tok);
+        break;
         default:
             std::cerr << "Unexpected character encountered: " << c << std::endl;
     }

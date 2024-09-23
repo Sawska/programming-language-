@@ -73,6 +73,7 @@ struct TOKEN
         NEW,
         TRUE,
         FALSE,
+        EXTENDS
     };
 
 
