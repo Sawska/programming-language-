@@ -18,7 +18,7 @@ public:
     void setVariableValue(const std::string& name, std::unique_ptr<AST> value);
     void listVariables() const;
 
-    SymbolTable clone() const;
+    std::unique_ptr<SymbolTable> clone() const;
 
     std::unordered_map<std::string, std::unique_ptr<AST>> deepCopyTable() const;
 

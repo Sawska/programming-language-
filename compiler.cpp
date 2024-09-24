@@ -21,7 +21,10 @@ void Compiler::REPL() {
     } else if (std::holds_alternative<std::string>(result)) {
         std::cout << std::get<std::string>(result) << std::endl;
     }else if (std::holds_alternative<ReturnType>(result)) {
-
+         auto res = evaluateAST(std::get<ReturnType>(result).returnValue);
+         if(std::holds_alternative<double>(res)) {
+            std::cout << std::get<double>(res) << std::endl;
+         }
     } else if(std::holds_alternative<bool>(result)) {
         std::cout << std::get<bool>(result) << std::endl;
     }

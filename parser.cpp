@@ -623,6 +623,7 @@ ASTNodePtr Parser::parseFunction() {
 }
 
 ASTNodePtr Parser::handleFunctionRefrence() {
+    index--;
     if (index >= tokens.size()) {
         throw std::runtime_error("Unexpected end of tokens");
     }
@@ -634,12 +635,16 @@ ASTNodePtr Parser::handleFunctionRefrence() {
 
     
         index++;
+        index++;
         while(index<tokens.size() && tokens[index].concept != TOKEN::TOKEN_CONCEPTS::CLOSE_CIRCLE_BRACKETS) {
             auto var = parseLogicalExpression();
             argument_list.push_back(std::move(var));
         }
+        index++;
 
-    FunctionNode* functionNode = dynamic_cast<FunctionNode*>(findFunctionInSymbolTableStack(functionName, currentTable).get());
+    ASTNodePtr functionASTNode = findFunctionInSymbolTableStack(functionName, currentTable);
+    FunctionNode* functionNode = dynamic_cast<FunctionNode*>(functionASTNode.get());
+
 
 
     
@@ -693,33 +698,32 @@ ASTNodePtr Parser::findVariableInSymbolTableStack(const std::string& varName, Sy
 }
 
 ASTNodePtr Parser::findFunctionInSymbolTableStack(const std::string& functionName, SymbolTable& currentTable) {
-
+    
     ASTNodePtr functionNode = currentTable.getVariableValue(functionName);
-
     if (functionNode) {
         return functionNode;
     }
 
-
+    
     std::stack<std::unique_ptr<SymbolTable>> tempStack;
     bool found = false;
 
-
+    
     while (!FunctionTableStack.empty()) {
-        std::unique_ptr<SymbolTable> tempTable = std::move(FunctionTableStack.top());
-        symbolTableStack.pop();
-        tempStack.push(std::move(tempTable));
+        std::unique_ptr<SymbolTable> tempTable = std::move(FunctionTableStack.top());  // Move the unique_ptr
+        FunctionTableStack.pop();  
+        tempStack.push(std::move(tempTable));  
+
         functionNode = tempStack.top()->getVariableValue(functionName);
-        
         if (functionNode) {
             found = true;
             break;
         }
     }
 
-    
+ 
     while (!tempStack.empty()) {
-        FunctionTableStack.push(std::move(tempStack.top()));
+        FunctionTableStack.push(std::move(tempStack.top()));  
         tempStack.pop();
     }
 
@@ -730,6 +734,7 @@ ASTNodePtr Parser::findFunctionInSymbolTableStack(const std::string& functionNam
 
     return functionNode;
 }
+
 
 ASTNodePtr Parser::parseClass()
 {

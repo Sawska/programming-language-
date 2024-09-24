@@ -32,8 +32,9 @@ std::unordered_map<std::string, std::unique_ptr<AST>> SymbolTable::deepCopyTable
     return newTable;
 }
 
-SymbolTable SymbolTable::clone() const {
-    SymbolTable cloned;
-    cloned.table = deepCopyTable();
+std::unique_ptr<SymbolTable> SymbolTable::clone() const {
+    auto cloned = std::make_unique<SymbolTable>();
+
+    cloned->table = deepCopyTable();
     return cloned;
 }
