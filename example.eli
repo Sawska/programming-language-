@@ -1,3 +1,7 @@
 class A {
-    
+    propety1
+     property2
+     a() {
+        
+     }
 }

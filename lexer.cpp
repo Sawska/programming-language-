@@ -280,6 +280,9 @@ void Lexer::processOperator(char c, std::ifstream &fileContent, std::vector<TOKE
         tok.concept = TOKEN::TOKEN_CONCEPTS::EXTENDS;
         result.push_back(tok);
         break;
+        case '.':
+        tok.concept = TOKEN::TOKEN_CONCEPTS::ACSESS;
+        result.push_back(tok);
         default:
             std::cerr << "Unexpected character encountered: " << c << std::endl;
     }
@@ -364,6 +367,7 @@ else if (buffer == "else") {
     else if(buffer == "class") {
         TOKEN token;
         push_concept_token(TOKEN::TOKEN_CONCEPTS::CLASS);
+        buffer.clear();
         while (fileContent.get(c) && (std::isalnum(c) || c == '_')) {
         buffer.push_back(c);
         }

@@ -26,6 +26,7 @@
 #include "FunctionNode.h"
 #include "BoolNode.h"
 #include "ClassNode.h"
+#include "ClassAccessNode.h"
 
 class Parser {
 public:
@@ -64,8 +65,12 @@ public:
     ASTNodePtr parseFunction();
     ASTNodePtr handleFunctionRefrence();
     ASTNodePtr handleArrayRefence();
+    ASTNodePtr findClassInSymbolTableStack(const std::string& className, SymbolTable& currentTable);
     ASTNodePtr findFunctionInSymbolTableStack(const std::string& functionName, SymbolTable& currentTable);
     ASTNodePtr parseClass();
+    ASTNodePtr parseMethodAndProperty(std::unique_ptr<SymbolTable> &methods,std::unique_ptr<SymbolTable> &attributes);
+    ASTNodePtr parseMethodOrConstructor();
+    ASTNodePtr parseClassAccsess();
 
 
 private:

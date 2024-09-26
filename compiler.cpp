@@ -99,6 +99,17 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
 }
 
 
+    case AST::Type::ClassAccess: {
+        auto classAccessNode = dynamic_cast<ClassAccessNode*>(node.get());
+        auto classNode = dynamic_cast<ClassNode*>(classAccessNode->baseClass.get());
+        if(classAccessNode->memberName != "") {
+            return evaluateAST(classNode->attributes->getVariableValue(classAccessNode->memberName));
+        } else if(classAccessNode->methodName != "") {
+            return evaluateAST(classNode->methods->getVariableValue(classAccessNode->methodName));
+        }
+    }
+
+
     case AST::Type::Return: {
     if (auto returnNode = dynamic_cast<ReturnNode*>(node.get())) {
         return ReturnType(std::move(returnNode->value));
@@ -341,8 +352,13 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
     }
 
     case AST::Type::Class: {
-        return VoidType{};
+    auto classNode = dynamic_cast<ClassNode*>(node.get());    
+    return std::unique_ptr<AST>(classNode); 
     }
+
+    
+
+
 
 
 
@@ -369,7 +385,8 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
                     ASTNodePtr node = AST::makeNumberNode(++operandValue);
                     update_variable(var->name, std::move(node));  
                     return ++operandValue;  
-                } else {
+                } 
+                else {
                     return ++operandValue;
                 }
             }

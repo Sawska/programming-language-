@@ -8,10 +8,14 @@ class ClassNode : public AST {
 public:
     std::unique_ptr<SymbolTable> methods;
     std::unique_ptr<SymbolTable> attributes;
+    std::unique_ptr<AST> constructor;
 
     std::unique_ptr<AST> clone() const override;
 
-    ClassNode(std::unique_ptr<SymbolTable> methods, std::unique_ptr<SymbolTable> attributes);
+    ClassNode(std::unique_ptr<SymbolTable> methods, 
+              std::unique_ptr<SymbolTable> attributes, 
+              std::unique_ptr<AST> constructor);
 };
+
 
 #endif // CLASSNODE_H

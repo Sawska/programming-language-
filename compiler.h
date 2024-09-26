@@ -25,7 +25,7 @@ struct ReturnType {
 };
 
 #define ISREPL 0
-using ASTResult = std::variant<double, std::string, ContinueType, BreakType, ReturnType,VoidType,bool,std::vector<ASTNodePtr>>;
+using ASTResult = std::variant<double, std::string, ContinueType, BreakType, ReturnType,VoidType,bool,std::vector<ASTNodePtr>,ASTNodePtr>;
 class Compiler {
 public:
     Compiler(Lexer& lex) 

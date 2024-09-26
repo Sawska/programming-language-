@@ -33,7 +33,8 @@ public:
         Access,
         Function,
         Bool,
-        Class
+        Class,
+        ClassAccess
     };
 
     Type type;
