@@ -1,7 +1,8 @@
-class A {
-    propety1
-     property2
-     a() {
-        
-     }
+class B {
+
+}
+
+
+class A : B {
+   super();  
 }

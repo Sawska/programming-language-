@@ -8,11 +8,11 @@ class ClassAccessNode : public AST {
 public:
     std::string memberName; 
     std::string methodName;
-    std::unique_ptr<AST> baseClass;
+    ASTNodePtr baseClass;
 
-    ClassAccessNode(std::string memberName,std::string methodName, std::unique_ptr<AST> baseClass);
+    ClassAccessNode(std::string memberName,std::string methodName, ASTNodePtr baseClass);
 
-    std::unique_ptr<AST> clone() const override;
+    ASTNodePtr clone() const override;
 };
 
 #endif // CLASSACCESSNODE_H

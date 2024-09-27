@@ -34,7 +34,9 @@ public:
         Function,
         Bool,
         Class,
-        ClassAccess
+        ClassAccess,
+        Object,
+        ObjectAccess
     };
 
     Type type;

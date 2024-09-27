@@ -98,14 +98,24 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
     return VoidType{};
 }
 
+    case AST::Type::ObjectAccess: {
+        auto objectAccessNode = dynamic_cast<ObjectAccessNode*>(node.get());
+        auto objectNode = dynamic_cast<ObjectNode*>(objectAccessNode->baseObject.get());
+        if(objectAccessNode->memberName != "") {
+            return evaluateAST(objectNode->attributes->getVariableValue(objectAccessNode->memberName));
+        } else if(objectAccessNode->methodName != "") {
+            return evaluateAST(objectNode->methods->getVariableValue(objectAccessNode->methodName));
+        }
+    }
+
 
     case AST::Type::ClassAccess: {
         auto classAccessNode = dynamic_cast<ClassAccessNode*>(node.get());
         auto classNode = dynamic_cast<ClassNode*>(classAccessNode->baseClass.get());
         if(classAccessNode->memberName != "") {
-            return evaluateAST(classNode->attributes->getVariableValue(classAccessNode->memberName));
+            return evaluateAST(classNode->getField(classAccessNode->memberName));
         } else if(classAccessNode->methodName != "") {
-            return evaluateAST(classNode->methods->getVariableValue(classAccessNode->methodName));
+            return evaluateAST(classNode->getMethod(classAccessNode->methodName));
         }
     }
 
@@ -355,6 +365,17 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
     auto classNode = dynamic_cast<ClassNode*>(node.get());    
     return std::unique_ptr<AST>(classNode); 
     }
+
+    case AST::Type::Object: {
+    auto objectNode = dynamic_cast<ObjectNode*>(node.get());
+    if (objectNode) {
+
+        return std::make_unique<ObjectNode>(objectNode);
+    } else {
+        throw std::runtime_error("Invalid object node");
+    }
+}
+
 
     
 

@@ -27,6 +27,8 @@
 #include "BoolNode.h"
 #include "ClassNode.h"
 #include "ClassAccessNode.h"
+#include "ObjectNode.h"
+#include "ObjectAccessNode.h"
 
 class Parser {
 public:
@@ -71,6 +73,7 @@ public:
     ASTNodePtr parseMethodAndProperty(std::unique_ptr<SymbolTable> &methods,std::unique_ptr<SymbolTable> &attributes);
     ASTNodePtr parseMethodOrConstructor();
     ASTNodePtr parseClassAccsess();
+    ASTNodePtr parseObjectInstance();
 
 
 private:

@@ -31,6 +31,8 @@ add_executable(PROGRAMMING_LANGUAGE
     BoolNode.cpp
     ClassNode.cpp
     ClassAccessNode.cpp
+    ObjectNode.cpp
+    ObjectAccessNode.cpp
 )
 
 

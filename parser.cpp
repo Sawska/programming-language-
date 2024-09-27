@@ -147,7 +147,7 @@ ASTNodePtr Parser::parseFactor() {
         return parseArray();
     } else if(token.concept == TOKEN::TOKEN_CONCEPTS::NEW) {
         index++;
-        return parseClassAccsess();
+        return parseObjectInstance();
     }
     else if(token.concept == TOKEN::TOKEN_CONCEPTS::FOR)  {
         index++;
@@ -318,21 +318,49 @@ ASTNodePtr Parser::handleVariableReference() {
             return std::make_unique<ArrayAccessNode>(varName,std::move(indexExpr));
             
             
-        } else if(tokens[index].concept == TOKEN::TOKEN_CONCEPTS::ACSESS) {
-            index++;
-            std::string property = tokens[index].variableName;
-            auto classNode = findClassInSymbolTableStack(varName,*symbolTableStack.top());   
-            std::string method;
-            std::string attributes;
+        } else if (tokens[index].concept == TOKEN::TOKEN_CONCEPTS::ACSESS) {
+    index++;
 
-            if(property[property.length()-1] == ')') {
-                method = property;
-            } else {
-                attributes = property;
-            }
+    
+    std::string property = tokens[index].variableName;
 
-            return std::make_unique<ClassAccessNode>(attributes,method,std::move(classNode));
+    
+    auto classNode = dynamic_cast<ClassNode*>(findClassInSymbolTableStack(varName, *symbolTableStack.top()).get());
+    auto objectNode = dynamic_cast<ObjectNode*>(findVariableInSymbolTableStack(varName, *symbolTableStack.top()).get());
+
+    if (classNode) {
+        
+        std::string method;
+        std::string attribute;
+
+        
+        if (tokens[index + 1].concept == TOKEN::OPEN_CIRCLE_BRACKETS) {
+            method = property;
+        } else {
+            attribute = property;
         }
+
+        return std::make_unique<ClassAccessNode>(attribute, method, std::move(dynamic_cast<ASTNodePtr*>(classNode)));
+
+    } else if (objectNode) {
+        
+        std::string method;
+        std::string attribute;
+
+        
+        if (tokens[index + 1].concept == TOKEN::OPEN_CIRCLE_BRACKETS) {
+            method = property;
+        } else {
+            attribute = property;
+        }
+
+        return std::make_unique<ObjectAccessNode>(attribute, method, std::move(objectNode));
+
+    } else {
+        throw std::runtime_error("Unknown class or object for access.");
+    }
+}
+
         return AST::makeEmptyNode();
     }
     
@@ -872,28 +900,48 @@ ASTNodePtr Parser::parseMethodOrConstructor() {
     return std::make_unique<FunctionNode>(std::move(argument_list), std::move(functionBody));
 }
 
-ASTNodePtr Parser::parseClassAccsess()
-{
-    if(tokens[index].concept != TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME) {
-        std::runtime_error("can't use new without class name");
+ASTNodePtr Parser::parseObjectInstance() {
+    if (tokens[index].concept != TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME) {
+        throw std::runtime_error("can't use new without class name");
     }
-    auto className = tokens[index].variableName;
-    auto res = findClassInSymbolTableStack(className,*classTableStack.top());
 
-    if(!res) {
-        std::runtime_error("this is not class name");
+    
+    auto className = tokens[index].variableName;
+    index++;
+
+    
+    auto res = findClassInSymbolTableStack(className, *classTableStack.top());
+    if (!res) {
+        throw std::runtime_error("this is not a class name");
     }
 
     auto classNode = dynamic_cast<ClassNode*>(res.get());
+    if (!classNode) {
+        throw std::runtime_error("Class node not found.");
+    }
 
-    // std::vector<ASTNodePtr> argument_list;
-    //     if (tokens[index].concept == TOKEN::OPEN_CIRCLE_BRACKETS) {
-    //         index++;
-    //         while (tokens[index].concept != TOKEN::CLOSE_CIRCLE_BRACKETS) {
-    //             auto arg = parseLogicalExpression();
-    //             argument_list.push_back(std::move(arg));
-    //         }
-    //         index++;
-    //     }
+    
+    std::vector<ASTNodePtr> argument_list;
+    if (tokens[index].concept == TOKEN::OPEN_CIRCLE_BRACKETS) {
+        index++;
+        while (tokens[index].concept != TOKEN::CLOSE_CIRCLE_BRACKETS) {
+            auto arg = parseLogicalExpression();
+            argument_list.push_back(std::move(arg));
+        }
+        index++;
+    }
 
+    
+    auto objectNode = std::make_unique<ObjectNode>(className, res->clone());
+
+    
+    if (classNode->constructor) {
+        auto constructor = dynamic_cast<FunctionNode*>(classNode->constructor.get());
+        if (constructor) {
+            constructor->argument_list = argument_list; 
+    
+        }
+    }
+
+    return std::move(objectNode); 
 }
