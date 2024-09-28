@@ -179,7 +179,7 @@ ASTNodePtr Parser::parseFactor() {
     } else if(token.concept == TOKEN::TOKEN_CONCEPTS::FUNCTION_NAME) {
         return handleFunctionRefrence();
     } else if(token.concept == TOKEN::TOKEN_CONCEPTS::CLASS) {
-        parseClass();
+        return parseClass();
     }
     else {
         std::cerr << "Unexpected token: " << token.op << " at index: " << index << std::endl;
@@ -325,8 +325,12 @@ ASTNodePtr Parser::handleVariableReference() {
     std::string property = tokens[index].variableName;
 
     
-    auto classNode = dynamic_cast<ClassNode*>(findClassInSymbolTableStack(varName, *symbolTableStack.top()).get());
-    auto objectNode = dynamic_cast<ObjectNode*>(findVariableInSymbolTableStack(varName, *symbolTableStack.top()).get());
+    auto classNodePtr = findClassInSymbolTableStack(varName, *symbolTableStack.top());
+    auto objectNodePtr = findVariableInSymbolTableStack(varName, *symbolTableStack.top());
+
+
+    auto classNode = dynamic_cast<ClassNode*>(classNodePtr.get());
+    auto objectNode = dynamic_cast<ObjectNode*>(objectNodePtr.get());
 
     if (classNode) {
         
@@ -340,7 +344,14 @@ ASTNodePtr Parser::handleVariableReference() {
             attribute = property;
         }
 
-        return std::make_unique<ClassAccessNode>(attribute, method, std::move(dynamic_cast<ASTNodePtr*>(classNode)));
+        return std::make_unique<ClassAccessNode>(
+    attribute,
+    method,
+    classNode->clone()
+);
+
+
+
 
     } else if (objectNode) {
         
@@ -354,7 +365,9 @@ ASTNodePtr Parser::handleVariableReference() {
             attribute = property;
         }
 
-        return std::make_unique<ObjectAccessNode>(attribute, method, std::move(objectNode));
+        return std::make_unique<ObjectAccessNode>(attribute, method, std::unique_ptr<ObjectNode>(objectNode));
+
+
 
     } else {
         throw std::runtime_error("Unknown class or object for access.");
@@ -805,15 +818,19 @@ ASTNodePtr Parser::parseClass() {
         } else {
             parseMethodAndProperty(methods, attributes);
         }
+        if(tokens[index].concept == TOKEN::TOKEN_CONCEPTS::CLOSE_BRACKETS) {
+            break;
+        }
         index++;
     }
 
     if (tokens[index].concept != TOKEN::TOKEN_CONCEPTS::CLOSE_BRACKETS) {
         throw std::runtime_error("Expected '}'");
     }
+    index++;    
 
     auto res = std::make_unique<ClassNode>(std::move(methods), std::move(attributes), std::move(constructor));
-    symbolTableStack.top()->setVariableValue(className,std::move(res));
+    classTableStack.top()->setVariableValue(className,res->clone());
     return res;
 }
 
@@ -863,6 +880,7 @@ ASTNodePtr Parser::parseMethodAndProperty(std::unique_ptr<SymbolTable> &methods,
         ASTNodePtr varNode = std::make_unique<VariableNode>(varName, nullptr);
         attributes->setVariableValue(varName, std::move(varNode));
         index++;
+        return varNode;
     } else if (tokens[index].concept == TOKEN::VARIABLE_NAME && tokens[index + 1].concept == TOKEN::OPEN_CIRCLE_BRACKETS) {
         
         std::string functionName = tokens[index].variableName;
@@ -886,6 +904,8 @@ ASTNodePtr Parser::parseMethodAndProperty(std::unique_ptr<SymbolTable> &methods,
 
 
 ASTNodePtr Parser::parseMethodOrConstructor() {
+    std::string functionName = tokens[index].variableName;
+    index++;
     
     std::vector<ASTNodePtr> argument_list;
     if (tokens[index].concept == TOKEN::OPEN_CIRCLE_BRACKETS) {
@@ -897,11 +917,13 @@ ASTNodePtr Parser::parseMethodOrConstructor() {
     }
 
     ASTNodePtr functionBody = parseBlock(); 
-    return std::make_unique<FunctionNode>(std::move(argument_list), std::move(functionBody));
+    return std::make_unique<FunctionNode>(std::move(functionBody), std::move(functionName), std::move(argument_list));
+
 }
 
 ASTNodePtr Parser::parseObjectInstance() {
-    if (tokens[index].concept != TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME) {
+
+    if (tokens[index].concept != TOKEN::TOKEN_CONCEPTS::CLASS_NAME) {
         throw std::runtime_error("can't use new without class name");
     }
 
@@ -930,15 +952,16 @@ ASTNodePtr Parser::parseObjectInstance() {
         }
         index++;
     }
+    index++;
 
     
-    auto objectNode = std::make_unique<ObjectNode>(className, res->clone());
+    auto objectNode = std::make_unique<ObjectNode>(res->clone());
 
     
     if (classNode->constructor) {
         auto constructor = dynamic_cast<FunctionNode*>(classNode->constructor.get());
         if (constructor) {
-            constructor->argument_list = argument_list; 
+            constructor->argument_list = std::move(argument_list);
     
         }
     }

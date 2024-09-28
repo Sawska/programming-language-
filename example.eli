@@ -1,8 +1,12 @@
-class B {
+class A {
 
+}
+class B : A {
+   
+   B() {
+      
+   }
 }
 
 
-class A : B {
-   super();  
-}
+

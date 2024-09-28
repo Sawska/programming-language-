@@ -370,7 +370,11 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
     auto objectNode = dynamic_cast<ObjectNode*>(node.get());
     if (objectNode) {
 
-        return std::make_unique<ObjectNode>(objectNode);
+
+    ASTNodePtr astNodePtr = std::unique_ptr<ObjectNode>(objectNode); 
+
+    return std::make_unique<ObjectNode>(std::move(astNodePtr));
+
     } else {
         throw std::runtime_error("Invalid object node");
     }

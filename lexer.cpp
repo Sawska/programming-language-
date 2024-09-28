@@ -378,6 +378,7 @@ else if (buffer == "else") {
         result.push_back(token);
     } else if(buffer == "new")
     {
+        buffer.clear();
         TOKEN token;
         push_concept_token(TOKEN::TOKEN_CONCEPTS::NEW);
         while (fileContent.get(c) && (std::isalnum(c) || c == '_')) {

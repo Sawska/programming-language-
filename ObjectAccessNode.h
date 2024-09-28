@@ -8,9 +8,9 @@ class ObjectAccessNode : public AST {
 public:
     std::string memberName;
     std::string methodName;
-    std::unique_ptr<AST> baseObject;
+    ASTNodePtr baseObject;
 
-    ObjectAccessNode(std::string memberName,std::string methodName, std::unique_ptr<AST> baseObject);
+    ObjectAccessNode(std::string memberName,std::string methodName, ASTNodePtr baseObject);
 
     std::unique_ptr<AST> clone() const override;
 };

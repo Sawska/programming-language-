@@ -1,7 +1,7 @@
 #include "ObjectNode.h"
 
-ObjectNode::ObjectNode(const std::string& name, ASTNodePtr node)
-    : AST(AST::Type::Object), className(name), classNode(std::move(node)) {
+ObjectNode::ObjectNode( ASTNodePtr node)
+    : AST(AST::Type::Object),  classNode(std::move(node)) {
     attributes = std::make_unique<SymbolTable>(); 
     methods = std::make_unique<SymbolTable>();    
 }
@@ -24,16 +24,23 @@ ASTNodePtr ObjectNode::getField(const std::string& fieldName) {
 }
 
 std::unique_ptr<AST> ObjectNode::clone() const {
-    auto clonedNode = std::make_unique<ObjectNode>(
-        className,
-        classNode->clone()  
-    );
+
+
+    auto clonedClassNode = classNode->clone();
+
+
+    auto clonedNode = std::make_unique<ObjectNode>(std::move(clonedClassNode));
+
+
     
-    clonedNode->attributes = std::make_unique<SymbolTable>(*attributes); 
-    clonedNode->methods = std::make_unique<SymbolTable>(*methods);       
+    clonedNode->attributes = std::make_unique<SymbolTable>();
+    clonedNode->attributes->table = this->attributes->deepCopyTable(); 
+    clonedNode->methods = std::make_unique<SymbolTable>();
+    clonedNode->methods->table = this->methods->deepCopyTable(); 
     
     return clonedNode;
 }
+
 
 void ObjectNode::setMethod(const std::string& methodName, ASTNodePtr method) {
     methods->setVariableValue(methodName, std::move(method));
