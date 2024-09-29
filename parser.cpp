@@ -266,6 +266,7 @@ ASTNodePtr Parser::handleVariableReference() {
     if(index < tokens.size() && tokens[index].concept == TOKEN::TOKEN_CONCEPTS::OPEN_CIRCLE_BRACKETS) {
         return handleFunctionRefrence();
     }
+    index--;
 
     SymbolTable& currentTable = *symbolTableStack.top();
     const TOKEN& token = tokens[index];
@@ -283,7 +284,7 @@ ASTNodePtr Parser::handleVariableReference() {
          tokens[index].op == TOKEN::OPERATORS::INCREMENT_OPERATOR || 
          tokens[index].op == TOKEN::OPERATORS::DECREMENT_OPERATOR || 
          tokens[index].op == TOKEN::OPERATORS::NOT_OPERATOR) ||
-         tokens[index].concept == TOKEN::TOKEN_CONCEPTS::OPEN_SQUARE_BRACKETS) {
+         tokens[index].concept == TOKEN::TOKEN_CONCEPTS::OPEN_SQUARE_BRACKETS || tokens[index].concept == TOKEN::TOKEN_CONCEPTS::ACSESS) {
 
         
         auto op = tokens[index].op;
@@ -355,6 +356,7 @@ ASTNodePtr Parser::handleVariableReference() {
 
     } else if (objectNode) {
         
+        
         std::string method;
         std::string attribute;
 
@@ -363,6 +365,11 @@ ASTNodePtr Parser::handleVariableReference() {
             method = property;
         } else {
             attribute = property;
+            if(tokens[index+1].op == TOKEN::OPERATORS::EQUALS_OPERATOR) {
+                auto value = parseLogicalExpression();
+                objectNode->setField(attribute, std::make_unique<VariableNode>(attribute, std::move(value)));
+                return std::make_unique<EmptyNode>();
+            }
         }
 
         return std::make_unique<ObjectAccessNode>(attribute, method, std::unique_ptr<ObjectNode>(objectNode));
@@ -804,8 +811,18 @@ ASTNodePtr Parser::parseClass() {
     std::unique_ptr<SymbolTable> methods = std::make_unique<SymbolTable>();
     std::unique_ptr<SymbolTable> attributes = std::make_unique<SymbolTable>();
     std::unique_ptr<AST> constructor = nullptr;  
+    std::unique_ptr<AST> parentClass = nullptr;
 
     index++;
+
+    if(tokens[index].concept == TOKEN::TOKEN_CONCEPTS::EXTENDS) {
+        index++;
+        if(tokens[index].concept != TOKEN::TOKEN_CONCEPTS::CLASS_NAME) {
+            parentClass = findClassInSymbolTableStack(tokens[index].variableName,*classTableStack.top());
+        }
+        index++;
+    }
+
     if (tokens[index].concept != TOKEN::TOKEN_CONCEPTS::OPEN_BRACKETS) {
         throw std::runtime_error("Expected '{'");
     }
@@ -830,6 +847,10 @@ ASTNodePtr Parser::parseClass() {
     index++;    
 
     auto res = std::make_unique<ClassNode>(std::move(methods), std::move(attributes), std::move(constructor));
+    if(parentClass) {
+        res->inheritFrom(std::move(dynamic_cast<ClassNode*>(parentClass.get())));
+    }
+    
     classTableStack.top()->setVariableValue(className,res->clone());
     return res;
 }
@@ -879,7 +900,7 @@ ASTNodePtr Parser::parseMethodAndProperty(std::unique_ptr<SymbolTable> &methods,
         std::string varName = tokens[index].variableName;
         ASTNodePtr varNode = std::make_unique<VariableNode>(varName, nullptr);
         attributes->setVariableValue(varName, std::move(varNode));
-        index++;
+        // index++;
         return varNode;
     } else if (tokens[index].concept == TOKEN::VARIABLE_NAME && tokens[index + 1].concept == TOKEN::OPEN_CIRCLE_BRACKETS) {
         
@@ -965,6 +986,7 @@ ASTNodePtr Parser::parseObjectInstance() {
     
         }
     }
+    // index++;
 
     return std::move(objectNode); 
 }

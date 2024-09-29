@@ -1,12 +1,10 @@
 class A {
+   a
+   A() {
 
-}
-class B : A {
-   
-   B() {
-      
    }
 }
 
-
-
+let b = new A()
+b.a = 1
+return b.a
