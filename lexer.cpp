@@ -125,11 +125,11 @@ bool Lexer::check_if_operator(char c) {
 
 void Lexer::processOperator(char c, std::ifstream &fileContent, std::vector<TOKEN> &result) {
     TOKEN tok;
-
     auto push_operator_token = [&result](TOKEN &tok, TOKEN::OPERATORS op) {
         tok.op = op;
         result.push_back(tok);
     };
+
 
     auto push_concept_token = [&result](TOKEN &tok, TOKEN::TOKEN_CONCEPTS concept) {
         tok.concept = concept;

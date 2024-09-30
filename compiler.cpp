@@ -1,5 +1,16 @@
 #include "compiler.h"
 
+template <typename T>
+void printIfType(const ASTResult& result) {
+    if (std::holds_alternative<T>(result)) {
+        std::cout << std::get<T>(result) << std::endl;
+    }
+}
+
+
+
+
+
 
 
 void Compiler::run() {
@@ -15,20 +26,15 @@ void Compiler::run() {
 
 void Compiler::REPL() {
     auto result = evaluateAST(root);
-
-    if (std::holds_alternative<double>(result)) {
-        std::cout << std::get<double>(result) << std::endl;
-    } else if (std::holds_alternative<std::string>(result)) {
-        std::cout << std::get<std::string>(result) << std::endl;
-    }else if (std::holds_alternative<ReturnType>(result)) {
+    printIfType<double>(result);
+    printIfType<std::string>(result);
+    printIfType<bool>(result);
+     if (std::holds_alternative<ReturnType>(result)) {
          auto res = evaluateAST(std::get<ReturnType>(result).returnValue);
          if(std::holds_alternative<double>(res)) {
             std::cout << std::get<double>(res) << std::endl;
          }
-    } else if(std::holds_alternative<bool>(result)) {
-        std::cout << std::get<bool>(result) << std::endl;
-    }
-     else if(std::holds_alternative<BreakType>(result))
+    } else if(std::holds_alternative<BreakType>(result))
     {
 
     } else if(std::holds_alternative<ContinueType>(result)) {
@@ -47,13 +53,13 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
 
     switch (node->type) {
         case AST::Type::Number: {
-            auto nd = dynamic_cast<NumberNode*>(node.get());
+            auto nd = static_cast<NumberNode*>(node.get());
             return nd->value;
         }
             
 
         case AST::Type::String: {
-            auto nd = dynamic_cast<StringNode*>(node.get());
+            auto nd = static_cast<StringNode*>(node.get());
             return nd->stringValue;
         }
         
@@ -62,7 +68,7 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
              return {};
         
         case AST::Type::Block: {
-    auto blockNode = dynamic_cast<BlockNode*>(node.get());
+    auto blockNode = static_cast<BlockNode*>(node.get());
     if (!blockNode) throw std::runtime_error("Invalid block node");
     
     symbolTableStack.push(std::move(blockNode->symbol_table));
@@ -99,8 +105,8 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
 }
 
     case AST::Type::ObjectAccess: {
-        auto objectAccessNode = dynamic_cast<ObjectAccessNode*>(node.get());
-        auto objectNode = dynamic_cast<ObjectNode*>(objectAccessNode->baseObject.get());
+        auto objectAccessNode = static_cast<ObjectAccessNode*>(node.get());
+        auto objectNode = static_cast<ObjectNode*>(objectAccessNode->baseObject.get());
         if(objectAccessNode->memberName != "") {
             return evaluateAST(objectNode->attributes->getVariableValue(objectAccessNode->memberName));
         } else if(objectAccessNode->methodName != "") {
@@ -110,8 +116,8 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
 
 
     case AST::Type::ClassAccess: {
-        auto classAccessNode = dynamic_cast<ClassAccessNode*>(node.get());
-        auto classNode = dynamic_cast<ClassNode*>(classAccessNode->baseClass.get());
+        auto classAccessNode = static_cast<ClassAccessNode*>(node.get());
+        auto classNode = static_cast<ClassNode*>(classAccessNode->baseClass.get());
         if(classAccessNode->memberName != "") {
             return evaluateAST(classNode->getField(classAccessNode->memberName));
         } else if(classAccessNode->methodName != "") {
@@ -121,7 +127,7 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
 
 
     case AST::Type::Return: {
-    if (auto returnNode = dynamic_cast<ReturnNode*>(node.get())) {
+    if (auto returnNode = static_cast<ReturnNode*>(node.get())) {
         return ReturnType(std::move(returnNode->value));
     } else {
         throw std::runtime_error("Invalid return node");
@@ -147,7 +153,7 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
 }
 
     case AST::Type::Array: {
-    auto arrayNode = dynamic_cast<ArrayNode*>(node.get());
+    auto arrayNode = static_cast<ArrayNode*>(node.get());
     if (!arrayNode) {
         throw std::runtime_error("Invalid node type for array.");
     }
@@ -160,7 +166,7 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
 
     
         case AST::Type::Access: {
-    auto AccessNode = dynamic_cast<ArrayAccessNode*>(node.get());
+    auto AccessNode = static_cast<ArrayAccessNode*>(node.get());
     if (!AccessNode) {
         throw std::runtime_error("Invalid node type for array access.");
     }
@@ -179,7 +185,7 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
 
 
         
-        ArrayNode* arrNode = dynamic_cast<ArrayNode*>(varPtr.get());
+        ArrayNode* arrNode = static_cast<ArrayNode*>(varPtr.get());
 
         if (!arrNode) {
             throw std::runtime_error("Variable is not an array.");
@@ -201,13 +207,13 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
 
 
         case AST::Type::Function: {
-    auto functionNode = dynamic_cast<FunctionNode*>(node.get());
+    auto functionNode = static_cast<FunctionNode*>(node.get());
     
 
     auto table = std::make_unique<SymbolTable>();
     
     for (int i = 0; i < functionNode->argument_list.size(); i++) {
-        auto val = dynamic_cast<VariableNode*>(functionNode->argument_list[i].get());
+        auto val = static_cast<VariableNode*>(functionNode->argument_list[i].get());
         if (val) {
             
             table->setVariableValue(val->name, std::move(functionNode->argument_list[i])); 
@@ -231,14 +237,16 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
 
 
         case AST::Type::BinaryOperation: {
-           auto binaryfNode = dynamic_cast<BinaryOperationNode*>(node.get());
+           auto binaryfNode = static_cast<BinaryOperationNode*>(node.get());
+           
             if (binaryfNode->op == TOKEN::OPERATORS::SEQUENCE_OPERATOR) {
                 evaluateAST(binaryfNode->left);
                 return evaluateAST(binaryfNode->right);
             }
 
+
             auto leftValue = evaluateAST(binaryfNode->left);
-            auto leftVar = dynamic_cast<VariableNode*>(binaryfNode->left.get());
+            auto leftVar = static_cast<VariableNode*>(binaryfNode->left.get());
             auto rightValue = evaluateAST(binaryfNode->right);
 
             if (binaryfNode->op == TOKEN::OPERATORS::PLUS_OPERATOR) {
@@ -334,7 +342,7 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
         }
 
         case AST::Type::IF: {
-    auto ifNode = dynamic_cast<IfNode*>(node.get());
+    auto ifNode = static_cast<IfNode*>(node.get());
     
     auto conditionValue = evaluateAST(ifNode->expression);
     
@@ -357,17 +365,17 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
 }
 
     case AST::Type::Bool: {
-        auto boolNode = dynamic_cast<BoolNode*>(node.get());
+        auto boolNode = static_cast<BoolNode*>(node.get());
         return boolNode->value;
     }
 
     case AST::Type::Class: {
-    auto classNode = dynamic_cast<ClassNode*>(node.get());    
+    auto classNode = static_cast<ClassNode*>(node.get());    
     return std::unique_ptr<AST>(classNode); 
     }
 
     case AST::Type::Object: {
-    auto objectNode = dynamic_cast<ObjectNode*>(node.get());
+    auto objectNode = static_cast<ObjectNode*>(node.get());
     if (objectNode) {
 
 
@@ -388,11 +396,11 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
 
 
         case AST::Type::UnaryOperation: {
-    auto unaryNode = dynamic_cast<UnaryOperationNode*>(node.get());
+    auto unaryNode = static_cast<UnaryOperationNode*>(node.get());
     auto operandResult = evaluateAST(unaryNode->operand);
 
     
-    auto var = dynamic_cast<VariableNode*>(unaryNode->operand.get());
+    auto var = static_cast<VariableNode*>(unaryNode->operand.get());
 
     if (std::holds_alternative<double>(operandResult)) {
         double operandValue = std::get<double>(operandResult);
@@ -437,7 +445,7 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
 
 
         case AST::Type::WHILE: {
-    if (auto whileNode = dynamic_cast<WhileNode*>(node.get())) {
+    if (auto whileNode = static_cast<WhileNode*>(node.get())) {
         loopStack.push(true);
         while (true) {
             
@@ -469,7 +477,7 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
 
 
 case AST::Type::FOR: {
-    if (auto forNode = dynamic_cast<ForNode*>(node.get())) {
+    if (auto forNode = static_cast<ForNode*>(node.get())) {
         loopStack.push(true);  
 
         
@@ -522,7 +530,7 @@ case AST::Type::FOR: {
             return evaluateAST(node->left);
 
         case AST::Type::Variable: {
-    auto varNode = dynamic_cast<VariableNode*>(node.get());
+    auto varNode = static_cast<VariableNode*>(node.get());
     if (!varNode) throw std::runtime_error("Invalid variable node");
     return evaluateAST(find_variable_value(varNode->name));
 }

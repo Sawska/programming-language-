@@ -1,5 +1,6 @@
 #include "parser.h"
 
+
 ASTNodePtr Parser::parse() {
     ASTNodePtr root = nullptr;
     symbolTableStack.push(std::make_unique<SymbolTable>());
@@ -32,24 +33,25 @@ ASTNodePtr Parser::parseExpression() {
 
     while (index < tokens.size()) {
         const TOKEN& token = tokens[index];
-        if (token.op == TOKEN::OPERATORS::PLUS_OPERATOR ||
-            token.op == TOKEN::OPERATORS::MINUS_OPERATOR ||
-            token.op == TOKEN::OPERATORS::GREATER_THAN_OPERATOR ||
-            token.op == TOKEN::OPERATORS::GREATER_THAN_EQUAL_OPERATOR ||
-            token.op == TOKEN::OPERATORS::LESS_THAN_EQUAL_OPERATOR ||
-            token.op == TOKEN::OPERATORS::LESS_THAN_OPERATOR ||
-            token.op == TOKEN::OPERATORS::COMPARE_OPERATOR ||
-            token.op == TOKEN::OPERATORS::NOT_EQUALS_OPERATOR ||
-            token.op == TOKEN::OPERATORS::EQUAL_PLUS_OPERATOR ||
-            token.op == TOKEN::OPERATORS::EQUAL_MINUS_OPERATOR) {
-            index++;
-            auto right = parseTerm();
-            left = AST::makeBinaryOperationNode(token.op, std::move(left), std::move(right));
-        } else if (token.op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
-            index++;
-            break;
-        } else {
-            break;
+        switch (token.op) {
+            case TOKEN::OPERATORS::PLUS_OPERATOR:
+            case TOKEN::OPERATORS::MINUS_OPERATOR:
+            case TOKEN::OPERATORS::GREATER_THAN_OPERATOR:
+            case TOKEN::OPERATORS::GREATER_THAN_EQUAL_OPERATOR:
+            case TOKEN::OPERATORS::LESS_THAN_EQUAL_OPERATOR:
+            case TOKEN::OPERATORS::LESS_THAN_OPERATOR:
+            case TOKEN::OPERATORS::COMPARE_OPERATOR:
+            case TOKEN::OPERATORS::NOT_EQUALS_OPERATOR:
+            case TOKEN::OPERATORS::EQUAL_PLUS_OPERATOR:
+            case TOKEN::OPERATORS::EQUAL_MINUS_OPERATOR:
+                index++;
+                left = AST::makeBinaryOperationNode(token.op, parseTerm(), std::move(left));
+                break;
+            case TOKEN::OPERATORS::NEWLINE_OPERATOR:
+                index++;
+                return left;
+            default:
+                return left;
         }
     }
 
@@ -61,27 +63,26 @@ ASTNodePtr Parser::parseLogicalExpression() {
 
     while (index < tokens.size()) {
         const TOKEN& token = tokens[index];
-        if (token.op == TOKEN::OPERATORS::AND_OPERATOR ||
-            token.op == TOKEN::OPERATORS::OR_OPERATOR ||
-            token.op == TOKEN::OPERATORS::LEFT_SHIFT_OPERATOR ||
-            token.op == TOKEN::OPERATORS::RIGHT_SHIFT_OPERATOR ||
-            token.op == TOKEN::OPERATORS::LEFT_SHIFT_EQUAL_OPERATOR ||
-            token.op == TOKEN::OPERATORS::RIGHT_SHIFT_EQUAL_OPERATOR ||
-            token.op == TOKEN::OPERATORS::NOT_EQUALS_OPERATOR ||
-            token.op == TOKEN::OPERATORS::BIT_AND_OPERATOR ||
-            token.op == TOKEN::OPERATORS::BIT_OR_OPERATOR) {
-            index++;
-            auto right = parseExpression();
-            left = AST::makeBinaryOperationNode(token.op, std::move(left), std::move(right));
-        } else if (token.op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
-            index++;
-            break;
-        } else if(token.concept == TOKEN::TOKEN_CONCEPTS::SEMICOLON)
-        {
-            break;
-        }
-        else {
-            break;
+        switch (token.op) {
+            case TOKEN::OPERATORS::AND_OPERATOR:
+            case TOKEN::OPERATORS::OR_OPERATOR:
+            case TOKEN::OPERATORS::LEFT_SHIFT_OPERATOR:
+            case TOKEN::OPERATORS::RIGHT_SHIFT_OPERATOR:
+            case TOKEN::OPERATORS::LEFT_SHIFT_EQUAL_OPERATOR:
+            case TOKEN::OPERATORS::RIGHT_SHIFT_EQUAL_OPERATOR:
+            case TOKEN::OPERATORS::NOT_EQUALS_OPERATOR:
+            case TOKEN::OPERATORS::BIT_AND_OPERATOR:
+            case TOKEN::OPERATORS::BIT_OR_OPERATOR:
+                index++;
+                left = AST::makeBinaryOperationNode(token.op, parseExpression(), std::move(left));
+                break;
+            case TOKEN::OPERATORS::NEWLINE_OPERATOR:
+                index++;
+                return left;
+            default:
+                if (token.concept == TOKEN::TOKEN_CONCEPTS::SEMICOLON)
+                    return left;
+                return left;
         }
     }
 
@@ -93,23 +94,20 @@ ASTNodePtr Parser::parseTerm() {
 
     while (index < tokens.size()) {
         const TOKEN& token = tokens[index];
-        if (token.op == TOKEN::OPERATORS::MULTIPLY_OPERATOR ||
-            token.op == TOKEN::OPERATORS::DIVIDE_OPERATOR ||
-            token.op == TOKEN::OPERATORS::EQUAL_DIVIDE_OPERATOR ||
-            token.op == TOKEN::OPERATORS::EQUAL_MULTIPLY_OPERATOR) {
-            index++;
-            auto right = parseFactor();
-            left = AST::makeBinaryOperationNode(token.op, std::move(left), std::move(right));
-        } else if (token.op == TOKEN::OPERATORS::NEWLINE_OPERATOR) {
-            index++;
-            break;
-        } else if(token.concept == TOKEN::TOKEN_CONCEPTS::COMMA)  
-        {
-            index++;
-            break;
-        }
-        else {
-            break;
+        switch (token.op) {
+            case TOKEN::OPERATORS::MULTIPLY_OPERATOR:
+            case TOKEN::OPERATORS::DIVIDE_OPERATOR:
+            case TOKEN::OPERATORS::EQUAL_DIVIDE_OPERATOR:
+            case TOKEN::OPERATORS::EQUAL_MULTIPLY_OPERATOR:
+                index++;
+                left = AST::makeBinaryOperationNode(token.op, parseFactor(), std::move(left));
+                break;
+            case TOKEN::OPERATORS::NEWLINE_OPERATOR:
+            case TOKEN::TOKEN_CONCEPTS::COMMA:
+                index++;
+                return left;
+            default:
+                return left;
         }
     }
 
@@ -122,70 +120,71 @@ ASTNodePtr Parser::parseFactor() {
     }
 
     const TOKEN& token = tokens[index];
-
-    if (token.concept == TOKEN::TOKEN_CONCEPTS::NUMBER) {
-        index++;
-        return AST::makeNumberNode(token.number);
-    } else if (token.concept == TOKEN::TOKEN_CONCEPTS::STRING) {
-        index++;
-        return AST::makeStringNode(token.string);
-    }  else if(token.concept == TOKEN::TOKEN_CONCEPTS::TRUE) {
-        return std::make_unique<BoolNode>(true);
-    } else if(token.concept == TOKEN::TOKEN_CONCEPTS::FALSE) {
-        return std::make_unique<BoolNode>(false);
-    }
-    else if (token.concept == TOKEN::TOKEN_CONCEPTS::OPEN_CIRCLE_BRACKETS) {
-        index++;
-        auto expr = parseExpression();
-        if (index >= tokens.size() || tokens[index].concept != TOKEN::TOKEN_CONCEPTS::CLOSE_CIRCLE_BRACKETS) {
-            throw std::runtime_error("Mismatched parentheses");
-        }
-        index++;
-        return expr;
-    } else if(token.concept == TOKEN::TOKEN_CONCEPTS::OPEN_SQUARE_BRACKETS)  {
-        index++;
-        return parseArray();
-    } else if(token.concept == TOKEN::TOKEN_CONCEPTS::NEW) {
-        index++;
-        return parseObjectInstance();
-    }
-    else if(token.concept == TOKEN::TOKEN_CONCEPTS::FOR)  {
-        index++;
-        return parseFor();
-    } else if (token.concept == TOKEN::TOKEN_CONCEPTS::OPEN_BRACKETS) {
-        return parseBlock();
-    } else if (token.op == TOKEN::OPERATORS::NOT_OPERATOR ||
-               token.op == TOKEN::OPERATORS::INCREMENT_OPERATOR ||
-               token.op == TOKEN::OPERATORS::DECREMENT_OPERATOR ||
-               token.op == TOKEN::OPERATORS::BIT_NOT_OPERATOR) {
-        index++;
-        auto operand = parseFactor();
-        if (!operand) throw std::runtime_error("Invalid operand for unary operation");
-        return AST::makeUnaryOperationNode(token.op, std::move(operand));
-    } else if (token.concept == TOKEN::TOKEN_CONCEPTS::VARIABLE) {
-        index++;
-        return parseVariableOrAssignment();
-    } else if (token.concept == TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME) {
-        return handleVariableReference();
-    }   else if(token.concept == TOKEN::TOKEN_CONCEPTS::WHILE) {
-        return parseWhile();
-    }
-    else if(token.concept == TOKEN::TOKEN_CONCEPTS::IF) {
-        return parseIf();
-    } else if(token.concept == TOKEN::TOKEN_CONCEPTS::RETURN) {
-        return parseReturn();
-    }  else if(token.concept == TOKEN::TOKEN_CONCEPTS::FUNCTION) {
-        return parseFunction();
-    } else if(token.concept == TOKEN::TOKEN_CONCEPTS::FUNCTION_NAME) {
-        return handleFunctionRefrence();
-    } else if(token.concept == TOKEN::TOKEN_CONCEPTS::CLASS) {
-        return parseClass();
-    }
-    else {
-        std::cerr << "Unexpected token: " << token.op << " at index: " << index << std::endl;
-        throw std::runtime_error("Unexpected token: " + std::to_string(token.op));
+    switch (token.concept) {
+        case TOKEN::TOKEN_CONCEPTS::NUMBER:
+            index++;
+            return AST::makeNumberNode(token.number);
+        case TOKEN::TOKEN_CONCEPTS::STRING:
+            index++;
+            return AST::makeStringNode(token.string);
+        case TOKEN::TOKEN_CONCEPTS::TRUE:
+            return std::make_unique<BoolNode>(true);
+        case TOKEN::TOKEN_CONCEPTS::FALSE:
+            return std::make_unique<BoolNode>(false);
+        case TOKEN::TOKEN_CONCEPTS::OPEN_CIRCLE_BRACKETS:
+            index++;
+            {
+                auto expr = parseExpression();
+                if (index >= tokens.size() || tokens[index].concept != TOKEN::TOKEN_CONCEPTS::CLOSE_CIRCLE_BRACKETS) {
+                    throw std::runtime_error("Mismatched parentheses");
+                }
+                index++;
+                return expr;
+            }
+        case TOKEN::TOKEN_CONCEPTS::OPEN_SQUARE_BRACKETS:
+            index++;
+            return parseArray();
+        case TOKEN::TOKEN_CONCEPTS::NEW:
+            index++;
+            return parseObjectInstance();
+        case TOKEN::TOKEN_CONCEPTS::FOR:
+            index++;
+            return parseFor();
+        case TOKEN::TOKEN_CONCEPTS::OPEN_BRACKETS:
+            return parseBlock();
+        case TOKEN::TOKEN_CONCEPTS::VARIABLE:
+            index++;
+            return parseVariableOrAssignment();
+        case TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME:
+            return handleVariableReference();
+        case TOKEN::TOKEN_CONCEPTS::WHILE:
+            return parseWhile();
+        case TOKEN::TOKEN_CONCEPTS::IF:
+            return parseIf();
+        case TOKEN::TOKEN_CONCEPTS::RETURN:
+            return parseReturn();
+        case TOKEN::TOKEN_CONCEPTS::FUNCTION:
+            return parseFunction();
+        case TOKEN::TOKEN_CONCEPTS::FUNCTION_NAME:
+            return handleFunctionRefrence();
+        case TOKEN::TOKEN_CONCEPTS::CLASS:
+            return parseClass();
+        default:
+            switch (token.op) {
+                case TOKEN::OPERATORS::NOT_OPERATOR:
+                case TOKEN::OPERATORS::INCREMENT_OPERATOR:
+                case TOKEN::OPERATORS::DECREMENT_OPERATOR:
+                case TOKEN::OPERATORS::BIT_NOT_OPERATOR:
+                    index++;
+                    return AST::makeUnaryOperationNode(token.op, parseFactor());
+                default:
+                    std::cerr << "Unexpected token: " << token.op << " at index: " << index << std::endl;
+                    throw std::runtime_error("Unexpected token: " + std::to_string(token.op));
+            }
     }
 }
+
+
 
 
 ASTNodePtr Parser::parseVariableOrAssignment() {
@@ -330,8 +329,8 @@ ASTNodePtr Parser::handleVariableReference() {
     auto objectNodePtr = findVariableInSymbolTableStack(varName, *symbolTableStack.top());
 
 
-    auto classNode = dynamic_cast<ClassNode*>(classNodePtr.get());
-    auto objectNode = dynamic_cast<ObjectNode*>(objectNodePtr.get());
+    auto classNode = static_cast<ClassNode*>(classNodePtr.get());
+    auto objectNode = static_cast<ObjectNode*>(objectNodePtr.get());
 
     if (classNode) {
         
@@ -634,10 +633,10 @@ ASTNodePtr Parser::parseArray()
     bool containsForNode = false;
 
     for (const auto& node : array) {
-        if (dynamic_cast<WhileNode*>(node.get())) {
+        if (static_cast<WhileNode*>(node.get())) {
             containsWhileNode = true;
         }
-        if (dynamic_cast<ForNode*>(node.get())) {
+        if (static_cast<ForNode*>(node.get())) {
             containsForNode = true;
         }
     }
@@ -708,7 +707,7 @@ ASTNodePtr Parser::handleFunctionRefrence() {
         index++;
 
     ASTNodePtr functionASTNode = findFunctionInSymbolTableStack(functionName, currentTable);
-    FunctionNode* functionNode = dynamic_cast<FunctionNode*>(functionASTNode.get());
+    FunctionNode* functionNode = static_cast<FunctionNode*>(functionASTNode.get());
 
 
 
@@ -848,7 +847,7 @@ ASTNodePtr Parser::parseClass() {
 
     auto res = std::make_unique<ClassNode>(std::move(methods), std::move(attributes), std::move(constructor));
     if(parentClass) {
-        res->inheritFrom(std::move(dynamic_cast<ClassNode*>(parentClass.get())));
+        res->inheritFrom(std::move(static_cast<ClassNode*>(parentClass.get())));
     }
     
     classTableStack.top()->setVariableValue(className,res->clone());
@@ -958,7 +957,7 @@ ASTNodePtr Parser::parseObjectInstance() {
         throw std::runtime_error("this is not a class name");
     }
 
-    auto classNode = dynamic_cast<ClassNode*>(res.get());
+    auto classNode = static_cast<ClassNode*>(res.get());
     if (!classNode) {
         throw std::runtime_error("Class node not found.");
     }
@@ -980,13 +979,13 @@ ASTNodePtr Parser::parseObjectInstance() {
 
     
     if (classNode->constructor) {
-        auto constructor = dynamic_cast<FunctionNode*>(classNode->constructor.get());
+        auto constructor = static_cast<FunctionNode*>(classNode->constructor.get());
         if (constructor) {
             constructor->argument_list = std::move(argument_list);
     
         }
     }
-    // index++;
+    
 
     return std::move(objectNode); 
 }

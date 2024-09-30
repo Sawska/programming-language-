@@ -12,7 +12,7 @@ void ObjectNode::setField(const std::string& fieldName, ASTNodePtr value) {
 
 ASTNodePtr ObjectNode::getField(const std::string& fieldName) {
     auto value = attributes->getVariableValue(fieldName);
-    auto classNodePtr = dynamic_cast<ClassNode*>(classNode.get());
+    auto classNodePtr = static_cast<ClassNode*>(classNode.get());
 
     if (value) {
         return value;
@@ -48,7 +48,7 @@ void ObjectNode::setMethod(const std::string& methodName, ASTNodePtr method) {
 
 ASTNodePtr ObjectNode::getMethod(const std::string& methodName) {
     auto result = methods->getVariableValue(methodName);
-    auto classNodePtr = dynamic_cast<ClassNode*>(classNode.get()); 
+    auto classNodePtr = static_cast<ClassNode*>(classNode.get()); 
 
     if (result) {
         return result;
