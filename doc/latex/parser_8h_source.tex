@@ -1,0 +1,87 @@
+\doxysection{parser.\+h}
+\hypertarget{parser_8h_source}{}\label{parser_8h_source}\mbox{\hyperlink{parser_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#ifndef\ PARSER\_H}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#define\ PARSER\_H}}
+\DoxyCodeLine{00003\ }
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <iostream>}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <memory>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ "{}token.h"{}}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{_a_s_t_8h}{AST.h}}"{}}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{_symbol_table_8h}{SymbolTable.h}}"{}}}
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ <stack>}}
+\DoxyCodeLine{00011\ \textcolor{preprocessor}{\#include\ "{}StringNode.h"{}}}
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#include\ "{}NumberNode.h"{}}}
+\DoxyCodeLine{00013\ \textcolor{preprocessor}{\#include\ "{}EmptyNode.h"{}}}
+\DoxyCodeLine{00014\ \textcolor{preprocessor}{\#include\ "{}VariableNode.h"{}}}
+\DoxyCodeLine{00015\ \textcolor{preprocessor}{\#include\ "{}UnaryOperationNode.h"{}}}
+\DoxyCodeLine{00016\ \textcolor{preprocessor}{\#include\ "{}BinaryOperationNode.h"{}}}
+\DoxyCodeLine{00017\ \textcolor{preprocessor}{\#include\ "{}BlockNode.h"{}}}
+\DoxyCodeLine{00018\ \textcolor{preprocessor}{\#include\ "{}ReturnNode.h"{}}}
+\DoxyCodeLine{00019\ \textcolor{preprocessor}{\#include\ "{}IfNode.h"{}}}
+\DoxyCodeLine{00020\ \textcolor{preprocessor}{\#include\ "{}WhileNode.h"{}}}
+\DoxyCodeLine{00021\ \textcolor{preprocessor}{\#include\ "{}BreakNode.h"{}}}
+\DoxyCodeLine{00022\ \textcolor{preprocessor}{\#include\ "{}ContinueNode.h"{}}}
+\DoxyCodeLine{00023\ \textcolor{preprocessor}{\#include\ "{}ForNode.h"{}}}
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#include\ "{}ArrayNode.h"{}}}
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#include\ "{}ArrayAccessNode.h"{}}}
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#include\ "{}FunctionNode.h"{}}}
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#include\ "{}BoolNode.h"{}}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ "{}ClassNode.h"{}}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}ClassAccessNode.h"{}}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ "{}ObjectNode.h"{}}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ "{}ObjectAccessNode.h"{}}}
+\DoxyCodeLine{00040\ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_parser}{Parser}}\ \{}
+\DoxyCodeLine{00041\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00042\ \ \ \ \ \mbox{\hyperlink{class_parser}{Parser}}(\mbox{\hyperlink{class_parser}{Parser}}\&\&)\ =\ \textcolor{keywordflow}{default};\ }
+\DoxyCodeLine{00043\ \ \ \ \ \mbox{\hyperlink{class_parser}{Parser}}\&\ operator=(\mbox{\hyperlink{class_parser}{Parser}}\&\&)\ =\ \textcolor{keywordflow}{default};\ }
+\DoxyCodeLine{00044\ \ \ \ \ }
+\DoxyCodeLine{00045\ \ \ \ \ }
+\DoxyCodeLine{00053\ \ \ \ \ \mbox{\hyperlink{class_parser_a9dec1ee2f0bcdb5c4cd96d6ced325d86}{Parser}}(\textcolor{keyword}{const}\ std::vector<TOKEN>\&\ tokens,\ \mbox{\hyperlink{class_symbol_table}{SymbolTable}}\&\&\ table,\mbox{\hyperlink{class_symbol_table}{SymbolTable}}\&\&\ functionTable,\mbox{\hyperlink{class_symbol_table}{SymbolTable}}\&\&\ classTable)}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ :\ tokens(tokens),\ index(0)\ \ \{}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ \ \ \ \ symbolTableStack.push(std::make\_unique<SymbolTable>(std::move(table)));}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \ \ \ \ FunctionTableStack.push(std::make\_unique<SymbolTable>(std::move(functionTable)));}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \ \ \ \ classTableStack.push(std::make\_unique<SymbolTable>(std::move(classTable)));}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00059\ }
+\DoxyCodeLine{00060\ \ \ \ \ ASTNodePtr\ parse();}
+\DoxyCodeLine{00061\ \ \ \ \ ASTNodePtr\ parseExpression();}
+\DoxyCodeLine{00062\ \ \ \ \ ASTNodePtr\ parseTerm();}
+\DoxyCodeLine{00063\ \ \ \ \ ASTNodePtr\ parseFactor();}
+\DoxyCodeLine{00064\ \ \ \ \ ASTNodePtr\ parseLogicalExpression();}
+\DoxyCodeLine{00065\ \ \ \ \ ASTNodePtr\ parseVariableOrAssignment();}
+\DoxyCodeLine{00066\ \ \ \ \ ASTNodePtr\ handleVariableReference();}
+\DoxyCodeLine{00067\ \ \ \ \ ASTNodePtr\ parseBlock();}
+\DoxyCodeLine{00068\ \ \ \ \ ASTNodePtr\ parseStatement();}
+\DoxyCodeLine{00069\ \ \ \ \ ASTNodePtr\ parseIf();}
+\DoxyCodeLine{00070\ \ \ \ \ ASTNodePtr\ parseWhile();}
+\DoxyCodeLine{00071\ \ \ \ \ ASTNodePtr\ parseReturn();}
+\DoxyCodeLine{00072\ \ \ \ \ std::stack<std::unique\_ptr<SymbolTable>>\ symbolTableStack;}
+\DoxyCodeLine{00073\ \ \ \ \ std::stack<std::unique\_ptr<SymbolTable>>\ FunctionTableStack;}
+\DoxyCodeLine{00074\ \ \ \ \ std::stack<std::unique\_ptr<SymbolTable>>\ classTableStack;}
+\DoxyCodeLine{00075\ \ \ \ \ ASTNodePtr\ findVariableInSymbolTableStack(\textcolor{keyword}{const}\ std::string\&\ varName,\ \mbox{\hyperlink{class_symbol_table}{SymbolTable}}\&\ currentTable);}
+\DoxyCodeLine{00076\ \ \ \ \ ASTNodePtr\ parseContinue();}
+\DoxyCodeLine{00077\ \ \ \ \ ASTNodePtr\ parseBreak();}
+\DoxyCodeLine{00078\ \ \ \ \ ASTNodePtr\ parseFor();}
+\DoxyCodeLine{00079\ \ \ \ \ ASTNodePtr\ parseArray();}
+\DoxyCodeLine{00080\ \ \ \ \ ASTNodePtr\ parseFunction();}
+\DoxyCodeLine{00081\ \ \ \ \ ASTNodePtr\ handleFunctionRefrence();}
+\DoxyCodeLine{00082\ \ \ \ \ ASTNodePtr\ handleArrayRefence();}
+\DoxyCodeLine{00083\ \ \ \ \ ASTNodePtr\ findClassInSymbolTableStack(\textcolor{keyword}{const}\ std::string\&\ className,\ \mbox{\hyperlink{class_symbol_table}{SymbolTable}}\&\ currentTable);}
+\DoxyCodeLine{00084\ \ \ \ \ ASTNodePtr\ findFunctionInSymbolTableStack(\textcolor{keyword}{const}\ std::string\&\ functionName,\ \mbox{\hyperlink{class_symbol_table}{SymbolTable}}\&\ currentTable);}
+\DoxyCodeLine{00085\ \ \ \ \ ASTNodePtr\ parseClass();}
+\DoxyCodeLine{00086\ \ \ \ \ ASTNodePtr\ parseMethodAndProperty(std::unique\_ptr<SymbolTable>\ \&methods,std::unique\_ptr<SymbolTable>\ \&attributes);}
+\DoxyCodeLine{00087\ \ \ \ \ ASTNodePtr\ parseMethodOrConstructor();}
+\DoxyCodeLine{00088\ \ \ \ \ ASTNodePtr\ parseClassAccsess();}
+\DoxyCodeLine{00089\ \ \ \ \ ASTNodePtr\ parseObjectInstance();}
+\DoxyCodeLine{00090\ }
+\DoxyCodeLine{00091\ }
+\DoxyCodeLine{00092\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00093\ \ \ \ \ std::vector<TOKEN>\ tokens;}
+\DoxyCodeLine{00094\ \ \ \ \ \textcolor{keywordtype}{int}\ index;}
+\DoxyCodeLine{00095\ \};}
+\DoxyCodeLine{00096\ }
+\DoxyCodeLine{00097\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ PARSER\_H}}
+
+\end{DoxyCode}

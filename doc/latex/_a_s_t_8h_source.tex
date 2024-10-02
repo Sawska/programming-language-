@@ -1,0 +1,71 @@
+\doxysection{AST.\+h}
+\hypertarget{_a_s_t_8h_source}{}\label{_a_s_t_8h_source}\mbox{\hyperlink{_a_s_t_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#ifndef\ AST\_H}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#define\ AST\_H}}
+\DoxyCodeLine{00003\ }
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <memory>}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ "{}token.h"{}}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ }
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{keyword}{using\ }ASTNodePtr\ =\ std::unique\_ptr<class\ AST>;}
+\DoxyCodeLine{00012\ }
+\DoxyCodeLine{00021\ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_a_s_t}{AST}}\ \{}
+\DoxyCodeLine{00022\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00023\ \ \ \ \ \textcolor{keyword}{enum\ class}\ Type\ \{}
+\DoxyCodeLine{00024\ \ \ \ \ \ \ \ \ Number,}
+\DoxyCodeLine{00025\ \ \ \ \ \ \ \ \ BinaryOperation,}
+\DoxyCodeLine{00026\ \ \ \ \ \ \ \ \ UnaryOperation,}
+\DoxyCodeLine{00027\ \ \ \ \ \ \ \ \ ParenthesizedExpression,}
+\DoxyCodeLine{00028\ \ \ \ \ \ \ \ \ Variable,}
+\DoxyCodeLine{00029\ \ \ \ \ \ \ \ \ VariableExpression,}
+\DoxyCodeLine{00030\ \ \ \ \ \ \ \ \ String,}
+\DoxyCodeLine{00031\ \ \ \ \ \ \ \ \ Unknown,}
+\DoxyCodeLine{00032\ \ \ \ \ \ \ \ \ Block,}
+\DoxyCodeLine{00033\ \ \ \ \ \ \ \ \ Empty,}
+\DoxyCodeLine{00034\ \ \ \ \ \ \ \ \ Return,}
+\DoxyCodeLine{00035\ \ \ \ \ \ \ \ \ IF,}
+\DoxyCodeLine{00036\ \ \ \ \ \ \ \ \ WHILE,}
+\DoxyCodeLine{00037\ \ \ \ \ \ \ \ \ Break,}
+\DoxyCodeLine{00038\ \ \ \ \ \ \ \ \ Continue,}
+\DoxyCodeLine{00039\ \ \ \ \ \ \ \ \ FOR,}
+\DoxyCodeLine{00040\ \ \ \ \ \ \ \ \ Array,}
+\DoxyCodeLine{00041\ \ \ \ \ \ \ \ \ Access,}
+\DoxyCodeLine{00042\ \ \ \ \ \ \ \ \ Function,}
+\DoxyCodeLine{00043\ \ \ \ \ \ \ \ \ Bool,}
+\DoxyCodeLine{00044\ \ \ \ \ \ \ \ \ Class,}
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ ClassAccess,}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ Object,}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ ObjectAccess}
+\DoxyCodeLine{00048\ \ \ \ \ \};}
+\DoxyCodeLine{00049\ }
+\DoxyCodeLine{00050\ \ \ \ \ Type\ type;}
+\DoxyCodeLine{00051\ \ \ \ \ \textcolor{keywordtype}{double}\ value;}
+\DoxyCodeLine{00052\ \ \ \ \ std::string\ stringValue;}
+\DoxyCodeLine{00053\ \ \ \ \ TOKEN::OPERATORS\ op;}
+\DoxyCodeLine{00054\ \ \ \ \ ASTNodePtr\ left;}
+\DoxyCodeLine{00055\ \ \ \ \ ASTNodePtr\ right;}
+\DoxyCodeLine{00056\ }
+\DoxyCodeLine{00057\ \ \ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{class_a_s_t}{AST}}(Type\ type);}
+\DoxyCodeLine{00058\ \ \ \ \ \mbox{\hyperlink{class_a_s_t}{AST}}(\mbox{\hyperlink{class_a_s_t}{AST}}\&\&)\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00059\ \ \ \ \ \mbox{\hyperlink{class_a_s_t}{AST}}\&\ operator=(\mbox{\hyperlink{class_a_s_t}{AST}}\&\&)\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00060\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{class_a_s_t}{\string~AST}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00061\ \ \ \ \ }
+\DoxyCodeLine{00062\ \ \ \ \ \textcolor{keyword}{virtual}\ std::unique\_ptr<AST>\ clone()\ \textcolor{keyword}{const}\ =\ 0;}
+\DoxyCodeLine{00063\ }
+\DoxyCodeLine{00064\ \ \ \ \ \textcolor{keyword}{static}\ ASTNodePtr\ makeNumberNode(\textcolor{keywordtype}{double}\ value);}
+\DoxyCodeLine{00065\ \ \ \ \ \textcolor{keyword}{static}\ ASTNodePtr\ makeBinaryOperationNode(TOKEN::OPERATORS\ op,\ ASTNodePtr\ left,\ ASTNodePtr\ right);}
+\DoxyCodeLine{00066\ \ \ \ \ \textcolor{keyword}{static}\ ASTNodePtr\ makeUnaryOperationNode(TOKEN::OPERATORS\ op,\ ASTNodePtr\ operand);}
+\DoxyCodeLine{00067\ \ \ \ \ \textcolor{keyword}{static}\ ASTNodePtr\ makeStringNode(\textcolor{keyword}{const}\ std::string\&\ value);}
+\DoxyCodeLine{00068\ \ \ \ \ \textcolor{keyword}{static}\ ASTNodePtr\ makeEmptyNode();}
+\DoxyCodeLine{00069\ \ \ \ \ \textcolor{keyword}{static}\ ASTNodePtr\ makeSequenceNode(ASTNodePtr\ left,\ ASTNodePtr\ right);}
+\DoxyCodeLine{00070\ \ \ \ \ \textcolor{keyword}{static}\ ASTNodePtr\ makeVariableNode(\textcolor{keyword}{const}\ std::string\&\ name,\ ASTNodePtr\ value);}
+\DoxyCodeLine{00071\ \};}
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00073\ }
+\DoxyCodeLine{00074\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ AST\_H}}
+
+\end{DoxyCode}

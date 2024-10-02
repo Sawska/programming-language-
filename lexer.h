@@ -12,6 +12,14 @@
 #include "variable.h"
 #include "SymbolTable.h"
 
+
+/**
+ * @brief Represents a lexer
+ * 
+ * This class reads chars to create tokens
+ * 
+ */
+
 class Lexer {
     public:
     Lexer() = default;

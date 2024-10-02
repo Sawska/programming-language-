@@ -1,0 +1,43 @@
+\doxysection{Symbol\+Table Class Reference}
+\hypertarget{class_symbol_table}{}\label{class_symbol_table}\index{SymbolTable@{SymbolTable}}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_symbol_table_a7d6f6ae7877c757ebd73247b274e46d3}\label{class_symbol_table_a7d6f6ae7877c757ebd73247b274e46d3} 
+{\bfseries Symbol\+Table} (\mbox{\hyperlink{class_symbol_table}{Symbol\+Table}} \&\&) noexcept=default
+\item 
+\Hypertarget{class_symbol_table_ab4192ed65ca0a325368706747cfb7859}\label{class_symbol_table_ab4192ed65ca0a325368706747cfb7859} 
+\mbox{\hyperlink{class_symbol_table}{Symbol\+Table}} \& {\bfseries operator=} (\mbox{\hyperlink{class_symbol_table}{Symbol\+Table}} \&\&) noexcept=default
+\item 
+\Hypertarget{class_symbol_table_a577ee29821613cccce7d5353d771f4ca}\label{class_symbol_table_a577ee29821613cccce7d5353d771f4ca} 
+{\bfseries Symbol\+Table} (const \mbox{\hyperlink{class_symbol_table}{Symbol\+Table}} \&)=delete
+\item 
+\Hypertarget{class_symbol_table_a0f6b1d94a2d1aa7ad516bb996d49a389}\label{class_symbol_table_a0f6b1d94a2d1aa7ad516bb996d49a389} 
+\mbox{\hyperlink{class_symbol_table}{Symbol\+Table}} \& {\bfseries operator=} (const \mbox{\hyperlink{class_symbol_table}{Symbol\+Table}} \&)=delete
+\item 
+\Hypertarget{class_symbol_table_a4b109723e4e81cd8e479d7f271f61c1d}\label{class_symbol_table_a4b109723e4e81cd8e479d7f271f61c1d} 
+std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{class_a_s_t}{AST}} $>$ {\bfseries get\+Variable\+Value} (const std\+::string \&name)
+\item 
+\Hypertarget{class_symbol_table_a7e7f7be89ef044fa6d310548b45573c6}\label{class_symbol_table_a7e7f7be89ef044fa6d310548b45573c6} 
+void {\bfseries set\+Variable\+Value} (const std\+::string \&name, std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{class_a_s_t}{AST}} $>$ value)
+\item 
+\Hypertarget{class_symbol_table_a728aca6a49a3ca3992e03fda330e27d8}\label{class_symbol_table_a728aca6a49a3ca3992e03fda330e27d8} 
+void {\bfseries list\+Variables} () const
+\item 
+\Hypertarget{class_symbol_table_a0323b346158133a2e6192aa1dab38b9c}\label{class_symbol_table_a0323b346158133a2e6192aa1dab38b9c} 
+std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{class_symbol_table}{Symbol\+Table}} $>$ {\bfseries clone} () const
+\item 
+\Hypertarget{class_symbol_table_ac0ddf6b0ea593ca0d5dfa8e62e81202c}\label{class_symbol_table_ac0ddf6b0ea593ca0d5dfa8e62e81202c} 
+std\+::unordered\+\_\+map$<$ std\+::string, std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{class_a_s_t}{AST}} $>$ $>$ {\bfseries deep\+Copy\+Table} () const
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_symbol_table_a889ee7e3d87dfa1e2f0f5da9a40d46a6}\label{class_symbol_table_a889ee7e3d87dfa1e2f0f5da9a40d46a6} 
+std\+::unordered\+\_\+map$<$ std\+::string, std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{class_a_s_t}{AST}} $>$ $>$ {\bfseries table}
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{_symbol_table_8h}{Symbol\+Table.\+h}}\end{DoxyCompactItemize}

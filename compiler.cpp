@@ -12,7 +12,10 @@ void printIfType(const ASTResult& result) {
 
 
 
-
+/**
+ * @brief runs a compiler class
+ * 
+ */
 void Compiler::run() {
     std::cout << "starting of compiler work" << std::endl;
     if(!ISREPL)

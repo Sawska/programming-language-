@@ -10,6 +10,14 @@
 
 using ASTNodePtr = std::unique_ptr<class AST>;
 
+/**
+ * @file AST.h
+ * @brief Header file for the AST class.
+ * 
+ * This file contains the definition of the AST class,
+ * which handles  all operations in programming language.
+ */
+
 class AST {
 public:
     enum class Type {

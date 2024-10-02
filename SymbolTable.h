@@ -6,6 +6,16 @@
 #include <memory>
 #include "AST.h"
 
+
+
+/**
+ * @file SymbolTable.h
+ * @brief Header file for the SymbolTable class.
+ * 
+ * This file contains the definition of the SymbolTable class,
+ * which stores functions,variables, classes
+ */
+
 class SymbolTable {
 public:
     SymbolTable() = default;

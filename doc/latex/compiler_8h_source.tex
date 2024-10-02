@@ -1,0 +1,64 @@
+\doxysection{compiler.\+h}
+\hypertarget{compiler_8h_source}{}\label{compiler_8h_source}\mbox{\hyperlink{compiler_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#ifndef\ COMPILER\_H}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#define\ COMPILER\_H}}
+\DoxyCodeLine{00003\ }
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}lexer.h"{}}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{parser_8h}{parser.h}}"{}}\ }
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{_symbol_table_8h}{SymbolTable.h}}"{}}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ "{}vector"{}}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_continue_type}{ContinueType}}\ \{}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \};}
+\DoxyCodeLine{00012\ }
+\DoxyCodeLine{00013\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_void_type}{VoidType}}\ \{}
+\DoxyCodeLine{00014\ }
+\DoxyCodeLine{00015\ \};}
+\DoxyCodeLine{00016\ }
+\DoxyCodeLine{00017\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_break_type}{BreakType}}\ \{}
+\DoxyCodeLine{00018\ \ \ \ \ }
+\DoxyCodeLine{00019\ \};}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00021\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_return_type}{ReturnType}}\ \{}
+\DoxyCodeLine{00022\ \ \ }
+\DoxyCodeLine{00023\ \ \ \ \ ASTNodePtr\ returnValue;}
+\DoxyCodeLine{00024\ \ \ \ \ \mbox{\hyperlink{struct_return_type}{ReturnType}}(ASTNodePtr\ value)\ :\ returnValue(std::move(value))\ \{\}}
+\DoxyCodeLine{00025\ \};}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#define\ ISREPL\ 0}}
+\DoxyCodeLine{00028\ \textcolor{keyword}{using\ }ASTResult\ =\ std::variant<double,\ std::string,\ ContinueType,\ BreakType,\ ReturnType,VoidType,bool,std::vector<ASTNodePtr>,ASTNodePtr>;}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00038\ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_compiler}{Compiler}}\ \{}
+\DoxyCodeLine{00039\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00043\ \ \ \ \ \mbox{\hyperlink{class_compiler_a505f4776e7ef203472b09de424a35f2e}{Compiler}}(\mbox{\hyperlink{class_lexer}{Lexer}}\&\ lex)\ }
+\DoxyCodeLine{00044\ \ \ \ \ \ \ \ \ :\ lexer(lex),\ }
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ \ \ parser(lexer.read\_file(),\ std::move(lexer.table),std::move(lexer.function\_table),std::move(lexer.class\_table))}
+\DoxyCodeLine{00046\ \ \ \ \ \{}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ root\ =\ parser.parse();}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ symbolTableStack\ =\ \ std::move(parser.symbolTableStack);}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ functionTableStack\ =\ std::move(parser.FunctionTableStack);}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ classTableStack\ =\ std::move(parser.classTableStack);}
+\DoxyCodeLine{00051\ \ \ \ \ \}}
+\DoxyCodeLine{00052\ }
+\DoxyCodeLine{00053\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_compiler_a5647a343d0c2aafe548e2ca7173646c8}{run}}();}
+\DoxyCodeLine{00054\ \ \ \ \ ASTResult\ evaluateAST(\textcolor{keyword}{const}\ ASTNodePtr\&\ node);}
+\DoxyCodeLine{00055\ \ \ \ \ \textcolor{keywordtype}{void}\ update\_variable(\textcolor{keyword}{const}\ std::string\&\ varName,\ ASTNodePtr\ node);}
+\DoxyCodeLine{00056\ \ \ \ \ ASTNodePtr\ find\_variable\_value(\textcolor{keyword}{const}\ std::string\&\ varName);}
+\DoxyCodeLine{00057\ }
+\DoxyCodeLine{00058\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00059\ \ \ \ \ \mbox{\hyperlink{class_lexer}{Lexer}}\&\ lexer;}
+\DoxyCodeLine{00060\ \ \ \ \ \mbox{\hyperlink{class_parser}{Parser}}\ parser;}
+\DoxyCodeLine{00061\ \ \ \ \ ASTNodePtr\ root;}
+\DoxyCodeLine{00062\ \ \ \ \ \textcolor{keywordtype}{void}\ REPL();}
+\DoxyCodeLine{00063\ \ \ \ \ ASTNodePtr\ findVariableInSymbolTableStack(\textcolor{keyword}{const}\ std::string\&\ varName,\ \mbox{\hyperlink{class_symbol_table}{SymbolTable}}\&\ currentTable);}
+\DoxyCodeLine{00064\ \ \ \ \ std::stack<std::unique\_ptr<SymbolTable>>\ symbolTableStack;}
+\DoxyCodeLine{00065\ \ \ \ \ std::stack<std::unique\_ptr<SymbolTable>>\ functionTableStack;}
+\DoxyCodeLine{00066\ \ \ \ \ std::stack<std::unique\_ptr<SymbolTable>>\ classTableStack;}
+\DoxyCodeLine{00067\ \ \ \ \ std::stack<bool>\ loopStack;\ }
+\DoxyCodeLine{00068\ \};}
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00070\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ COMPILER\_H}}
+
+\end{DoxyCode}

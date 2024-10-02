@@ -1,0 +1,26 @@
+\doxysection{Compiler Class Reference}
+\hypertarget{class_compiler}{}\label{class_compiler}\index{Compiler@{Compiler}}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_compiler_a505f4776e7ef203472b09de424a35f2e}\label{class_compiler_a505f4776e7ef203472b09de424a35f2e} 
+{\bfseries Compiler} (\mbox{\hyperlink{class_lexer}{Lexer}} \&lex)
+\begin{DoxyCompactList}\small\item\em Constructs a \doxylink{class_compiler}{Compiler} with the \doxylink{class_parser}{Parser} and \doxylink{class_lexer}{Lexer}. \end{DoxyCompactList}\item 
+\Hypertarget{class_compiler_a5647a343d0c2aafe548e2ca7173646c8}\label{class_compiler_a5647a343d0c2aafe548e2ca7173646c8} 
+void {\bfseries run} ()
+\begin{DoxyCompactList}\small\item\em runs a compiler class \end{DoxyCompactList}\item 
+\Hypertarget{class_compiler_aac1e3b09bf08b3e60d37a1079af45a52}\label{class_compiler_aac1e3b09bf08b3e60d37a1079af45a52} 
+ASTResult {\bfseries evaluate\+AST} (const ASTNode\+Ptr \&node)
+\item 
+\Hypertarget{class_compiler_aa2f5cda4eaca3eae3d4c5133dbcd7551}\label{class_compiler_aa2f5cda4eaca3eae3d4c5133dbcd7551} 
+void {\bfseries update\+\_\+variable} (const std\+::string \&var\+Name, ASTNode\+Ptr node)
+\item 
+\Hypertarget{class_compiler_a21d16cb5866274b6448542923abc298f}\label{class_compiler_a21d16cb5866274b6448542923abc298f} 
+ASTNode\+Ptr {\bfseries find\+\_\+variable\+\_\+value} (const std\+::string \&var\+Name)
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{compiler_8h}{compiler.\+h}}\item 
+compiler.\+cpp\end{DoxyCompactItemize}

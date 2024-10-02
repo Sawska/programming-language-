@@ -26,8 +26,20 @@ struct ReturnType {
 
 #define ISREPL 0
 using ASTResult = std::variant<double, std::string, ContinueType, BreakType, ReturnType,VoidType,bool,std::vector<ASTNodePtr>,ASTNodePtr>;
+
+/**
+ * @file compiler.h
+ * @brief Header file for the Compiler class.
+ * 
+ * This file contains the definition of the Compiler class,
+ * which handles AST nodes.
+ */
+
 class Compiler {
 public:
+   /**
+     * @brief Constructs a Compiler with the Parser and Lexer 
+     */
     Compiler(Lexer& lex) 
         : lexer(lex), 
           parser(lexer.read_file(), std::move(lexer.table),std::move(lexer.function_table),std::move(lexer.class_table))

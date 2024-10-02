@@ -1,0 +1,42 @@
+\doxysection{compiler.\+h File Reference}
+\hypertarget{compiler_8h}{}\label{compiler_8h}\index{compiler.h@{compiler.h}}
+
+
+Header file for the \doxylink{class_compiler}{Compiler} class.  
+
+
+{\ttfamily \#include "{}lexer.\+h"{}}\newline
+{\ttfamily \#include "{}parser.\+h"{}}\newline
+{\ttfamily \#include "{}Symbol\+Table.\+h"{}}\newline
+{\ttfamily \#include "{}vector"{}}\newline
+\doxysubsubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{struct_continue_type}{Continue\+Type}}
+\item 
+struct \mbox{\hyperlink{struct_void_type}{Void\+Type}}
+\item 
+struct \mbox{\hyperlink{struct_break_type}{Break\+Type}}
+\item 
+struct \mbox{\hyperlink{struct_return_type}{Return\+Type}}
+\item 
+class \mbox{\hyperlink{class_compiler}{Compiler}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{compiler_8h_afa375bd7b5205e74e1e0130fa8397e4c}\label{compiler_8h_afa375bd7b5205e74e1e0130fa8397e4c} 
+\#define {\bfseries ISREPL}~0
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{compiler_8h_ac08948751d377d273f32556d7943a082}\label{compiler_8h_ac08948751d377d273f32556d7943a082} 
+using {\bfseries ASTResult} = std\+::variant$<$double, std\+::string, \mbox{\hyperlink{struct_continue_type}{Continue\+Type}}, \mbox{\hyperlink{struct_break_type}{Break\+Type}}, \mbox{\hyperlink{struct_return_type}{Return\+Type}},\mbox{\hyperlink{struct_void_type}{Void\+Type}},bool,std\+::vector$<$ASTNode\+Ptr$>$,ASTNode\+Ptr$>$
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Header file for the \doxylink{class_compiler}{Compiler} class. 
+
+This file contains the definition of the \doxylink{class_compiler}{Compiler} class, which handles \doxylink{class_a_s_t}{AST} nodes. 

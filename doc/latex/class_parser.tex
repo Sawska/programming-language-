@@ -1,0 +1,135 @@
+\doxysection{Parser Class Reference}
+\hypertarget{class_parser}{}\label{class_parser}\index{Parser@{Parser}}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_parser_a332db3c6038e7b2bf158e0820fdb0083}\label{class_parser_a332db3c6038e7b2bf158e0820fdb0083} 
+{\bfseries Parser} (\mbox{\hyperlink{class_parser}{Parser}} \&\&)=default
+\item 
+\Hypertarget{class_parser_aeea296171502655c451a40ad97890bef}\label{class_parser_aeea296171502655c451a40ad97890bef} 
+\mbox{\hyperlink{class_parser}{Parser}} \& {\bfseries operator=} (\mbox{\hyperlink{class_parser}{Parser}} \&\&)=default
+\item 
+\mbox{\hyperlink{class_parser_a9dec1ee2f0bcdb5c4cd96d6ced325d86}{Parser}} (const std\+::vector$<$ TOKEN $>$ \&tokens, \mbox{\hyperlink{class_symbol_table}{Symbol\+Table}} \&\&table, \mbox{\hyperlink{class_symbol_table}{Symbol\+Table}} \&\&function\+Table, \mbox{\hyperlink{class_symbol_table}{Symbol\+Table}} \&\&class\+Table)
+\begin{DoxyCompactList}\small\item\em Constructs a \doxylink{class_parser}{Parser}. \end{DoxyCompactList}\item 
+\Hypertarget{class_parser_a7162c790f6eebd162d8b2e95063a9b80}\label{class_parser_a7162c790f6eebd162d8b2e95063a9b80} 
+ASTNode\+Ptr {\bfseries parse} ()
+\item 
+\Hypertarget{class_parser_afdf829a89eb20acec484ec1d13964e2a}\label{class_parser_afdf829a89eb20acec484ec1d13964e2a} 
+ASTNode\+Ptr {\bfseries parse\+Expression} ()
+\item 
+\Hypertarget{class_parser_a786787e626088efa470eb0b6c0afbc25}\label{class_parser_a786787e626088efa470eb0b6c0afbc25} 
+ASTNode\+Ptr {\bfseries parse\+Term} ()
+\item 
+\Hypertarget{class_parser_a78293fedaaa9d7c3f9a833629497613d}\label{class_parser_a78293fedaaa9d7c3f9a833629497613d} 
+ASTNode\+Ptr {\bfseries parse\+Factor} ()
+\item 
+\Hypertarget{class_parser_ac71dddf875fc68b308a30bca7d4cdfec}\label{class_parser_ac71dddf875fc68b308a30bca7d4cdfec} 
+ASTNode\+Ptr {\bfseries parse\+Logical\+Expression} ()
+\item 
+\Hypertarget{class_parser_ab7f04befddb4276a3d4d3db59ab3d488}\label{class_parser_ab7f04befddb4276a3d4d3db59ab3d488} 
+ASTNode\+Ptr {\bfseries parse\+Variable\+Or\+Assignment} ()
+\item 
+\Hypertarget{class_parser_abc23a1ccda498ecf4698695b0b6dc700}\label{class_parser_abc23a1ccda498ecf4698695b0b6dc700} 
+ASTNode\+Ptr {\bfseries handle\+Variable\+Reference} ()
+\item 
+\Hypertarget{class_parser_a123b3f79d974612ba573e6aa16b5a363}\label{class_parser_a123b3f79d974612ba573e6aa16b5a363} 
+ASTNode\+Ptr {\bfseries parse\+Block} ()
+\item 
+\Hypertarget{class_parser_ad5ed03e65850922d3943223a9ea5c60e}\label{class_parser_ad5ed03e65850922d3943223a9ea5c60e} 
+ASTNode\+Ptr {\bfseries parse\+Statement} ()
+\item 
+\Hypertarget{class_parser_accb7880f68cbe28361704aed07a24a17}\label{class_parser_accb7880f68cbe28361704aed07a24a17} 
+ASTNode\+Ptr {\bfseries parse\+If} ()
+\item 
+\Hypertarget{class_parser_abd827142e670f6eb3a291b45e8d6fde4}\label{class_parser_abd827142e670f6eb3a291b45e8d6fde4} 
+ASTNode\+Ptr {\bfseries parse\+While} ()
+\item 
+\Hypertarget{class_parser_aeac914a11115ac8998dd6d568d9b111d}\label{class_parser_aeac914a11115ac8998dd6d568d9b111d} 
+ASTNode\+Ptr {\bfseries parse\+Return} ()
+\item 
+\Hypertarget{class_parser_a18672207eb33096641f6cefe4736125f}\label{class_parser_a18672207eb33096641f6cefe4736125f} 
+ASTNode\+Ptr {\bfseries find\+Variable\+In\+Symbol\+Table\+Stack} (const std\+::string \&var\+Name, \mbox{\hyperlink{class_symbol_table}{Symbol\+Table}} \&current\+Table)
+\item 
+\Hypertarget{class_parser_ab59c16a641082dd439e0b28106f36706}\label{class_parser_ab59c16a641082dd439e0b28106f36706} 
+ASTNode\+Ptr {\bfseries parse\+Continue} ()
+\item 
+\Hypertarget{class_parser_a5a290e0d3de578ba7d4e19d815ec77ee}\label{class_parser_a5a290e0d3de578ba7d4e19d815ec77ee} 
+ASTNode\+Ptr {\bfseries parse\+Break} ()
+\item 
+\Hypertarget{class_parser_a05758d27172b1af34f96eecd2b74307f}\label{class_parser_a05758d27172b1af34f96eecd2b74307f} 
+ASTNode\+Ptr {\bfseries parse\+For} ()
+\item 
+\Hypertarget{class_parser_a8de37a797a73b2be6be951227ff15a0a}\label{class_parser_a8de37a797a73b2be6be951227ff15a0a} 
+ASTNode\+Ptr {\bfseries parse\+Array} ()
+\item 
+\Hypertarget{class_parser_a265be440cada9a4422e01f9758467e8d}\label{class_parser_a265be440cada9a4422e01f9758467e8d} 
+ASTNode\+Ptr {\bfseries parse\+Function} ()
+\item 
+\Hypertarget{class_parser_a90e38d6380fbed0f5ed48b53ae5bad14}\label{class_parser_a90e38d6380fbed0f5ed48b53ae5bad14} 
+ASTNode\+Ptr {\bfseries handle\+Function\+Refrence} ()
+\item 
+\Hypertarget{class_parser_afb8a86f336211eee06e05647919c2d67}\label{class_parser_afb8a86f336211eee06e05647919c2d67} 
+ASTNode\+Ptr {\bfseries handle\+Array\+Refence} ()
+\item 
+\Hypertarget{class_parser_af8759d90d55fb7f88667d40c7d96b72d}\label{class_parser_af8759d90d55fb7f88667d40c7d96b72d} 
+ASTNode\+Ptr {\bfseries find\+Class\+In\+Symbol\+Table\+Stack} (const std\+::string \&class\+Name, \mbox{\hyperlink{class_symbol_table}{Symbol\+Table}} \&current\+Table)
+\item 
+\Hypertarget{class_parser_a86ba4e6350d6aa089e97e7b456b482cb}\label{class_parser_a86ba4e6350d6aa089e97e7b456b482cb} 
+ASTNode\+Ptr {\bfseries find\+Function\+In\+Symbol\+Table\+Stack} (const std\+::string \&function\+Name, \mbox{\hyperlink{class_symbol_table}{Symbol\+Table}} \&current\+Table)
+\item 
+\Hypertarget{class_parser_a8947991fffbdc62ddb54af566654a2e3}\label{class_parser_a8947991fffbdc62ddb54af566654a2e3} 
+ASTNode\+Ptr {\bfseries parse\+Class} ()
+\item 
+\Hypertarget{class_parser_a7e8590c6455a34d83042c74e1850bdae}\label{class_parser_a7e8590c6455a34d83042c74e1850bdae} 
+ASTNode\+Ptr {\bfseries parse\+Method\+And\+Property} (std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{class_symbol_table}{Symbol\+Table}} $>$ \&methods, std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{class_symbol_table}{Symbol\+Table}} $>$ \&attributes)
+\item 
+\Hypertarget{class_parser_a02b00c21692e3a9c00012fc4f9d0cb2c}\label{class_parser_a02b00c21692e3a9c00012fc4f9d0cb2c} 
+ASTNode\+Ptr {\bfseries parse\+Method\+Or\+Constructor} ()
+\item 
+\Hypertarget{class_parser_aeede69aadce71cc2be081b476eafef36}\label{class_parser_aeede69aadce71cc2be081b476eafef36} 
+ASTNode\+Ptr {\bfseries parse\+Class\+Accsess} ()
+\item 
+\Hypertarget{class_parser_ac25778f21333bc33695bc8cdb1ce3b02}\label{class_parser_ac25778f21333bc33695bc8cdb1ce3b02} 
+ASTNode\+Ptr {\bfseries parse\+Object\+Instance} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_parser_a90514106945cf9660598a1db2329b67c}\label{class_parser_a90514106945cf9660598a1db2329b67c} 
+std\+::stack$<$ std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{class_symbol_table}{Symbol\+Table}} $>$ $>$ {\bfseries symbol\+Table\+Stack}
+\item 
+\Hypertarget{class_parser_afd560c7f65f4f08606319ab67baa8a87}\label{class_parser_afd560c7f65f4f08606319ab67baa8a87} 
+std\+::stack$<$ std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{class_symbol_table}{Symbol\+Table}} $>$ $>$ {\bfseries Function\+Table\+Stack}
+\item 
+\Hypertarget{class_parser_a4bb4a235e2a97d875a7f0b9ad41a9436}\label{class_parser_a4bb4a235e2a97d875a7f0b9ad41a9436} 
+std\+::stack$<$ std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{class_symbol_table}{Symbol\+Table}} $>$ $>$ {\bfseries class\+Table\+Stack}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{class_parser_a9dec1ee2f0bcdb5c4cd96d6ced325d86}\index{Parser@{Parser}!Parser@{Parser}}
+\index{Parser@{Parser}!Parser@{Parser}}
+\doxysubsubsection{\texorpdfstring{Parser()}{Parser()}}
+{\footnotesize\ttfamily \label{class_parser_a9dec1ee2f0bcdb5c4cd96d6ced325d86} 
+Parser\+::\+Parser (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ TOKEN $>$ \&}]{tokens}{, }\item[{\mbox{\hyperlink{class_symbol_table}{Symbol\+Table}} \&\&}]{table}{, }\item[{\mbox{\hyperlink{class_symbol_table}{Symbol\+Table}} \&\&}]{function\+Table}{, }\item[{\mbox{\hyperlink{class_symbol_table}{Symbol\+Table}} \&\&}]{class\+Table}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Constructs a \doxylink{class_parser}{Parser}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em tokens} & tokens vector \\
+\hline
+{\em table} & symbol table of variables \\
+\hline
+{\em function\+Table} & \\
+\hline
+{\em class\+Table} & \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{parser_8h}{parser.\+h}}\end{DoxyCompactItemize}

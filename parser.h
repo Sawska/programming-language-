@@ -29,6 +29,13 @@
 #include "ClassAccessNode.h"
 #include "ObjectNode.h"
 #include "ObjectAccessNode.h"
+/**
+ * @file parser.h
+ * @brief Header file for the parser class.
+ * 
+ * This file contains the definition of the parser class,
+ * which handles tokens.
+ */
 
 class Parser {
 public:
@@ -36,7 +43,13 @@ public:
     Parser& operator=(Parser&&) = default; 
     
     
-    
+       /**
+     * @brief Constructs a Parser 
+     * @param tokens tokens vector
+     * @param table symbol table of variables
+     * @param functionTable
+     * @param classTable 
+     */
     Parser(const std::vector<TOKEN>& tokens, SymbolTable&& table,SymbolTable&& functionTable,SymbolTable&& classTable)
         : tokens(tokens), index(0)  {
             symbolTableStack.push(std::make_unique<SymbolTable>(std::move(table)));

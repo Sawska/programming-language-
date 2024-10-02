@@ -1,0 +1,103 @@
+\doxysection{AST Class Reference}
+\hypertarget{class_a_s_t}{}\label{class_a_s_t}\index{AST@{AST}}
+\doxysubsubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_a_s_t_a427de75aed6e54407490352f042ca63b}\label{class_a_s_t_a427de75aed6e54407490352f042ca63b} 
+enum class {\bfseries Type} \{ \newline
+{\bfseries Number}
+, {\bfseries Binary\+Operation}
+, {\bfseries Unary\+Operation}
+, {\bfseries Parenthesized\+Expression}
+, \newline
+{\bfseries Variable}
+, {\bfseries Variable\+Expression}
+, {\bfseries String}
+, {\bfseries Unknown}
+, \newline
+{\bfseries Block}
+, {\bfseries Empty}
+, {\bfseries Return}
+, {\bfseries IF}
+, \newline
+{\bfseries WHILE}
+, {\bfseries Break}
+, {\bfseries Continue}
+, {\bfseries FOR}
+, \newline
+{\bfseries Array}
+, {\bfseries Access}
+, {\bfseries Function}
+, {\bfseries Bool}
+, \newline
+{\bfseries Class}
+, {\bfseries Class\+Access}
+, {\bfseries Object}
+, {\bfseries Object\+Access}
+ \}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_a_s_t_a2f74cd5b378a784fd8e24fb81e527a28}\label{class_a_s_t_a2f74cd5b378a784fd8e24fb81e527a28} 
+{\bfseries AST} (Type type)
+\item 
+\Hypertarget{class_a_s_t_aebc70ccb04217597009cad884fffb95d}\label{class_a_s_t_aebc70ccb04217597009cad884fffb95d} 
+{\bfseries AST} (\mbox{\hyperlink{class_a_s_t}{AST}} \&\&)=default
+\item 
+\Hypertarget{class_a_s_t_a4523602fb50cb7c2be4eb21d494fbd24}\label{class_a_s_t_a4523602fb50cb7c2be4eb21d494fbd24} 
+\mbox{\hyperlink{class_a_s_t}{AST}} \& {\bfseries operator=} (\mbox{\hyperlink{class_a_s_t}{AST}} \&\&)=default
+\item 
+\Hypertarget{class_a_s_t_a68185503570d84babafe4b4651ea22a7}\label{class_a_s_t_a68185503570d84babafe4b4651ea22a7} 
+virtual std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{class_a_s_t}{AST}} $>$ {\bfseries clone} () const =0
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_a_s_t_a169314b73b72640fd38e0c24399230ca}\label{class_a_s_t_a169314b73b72640fd38e0c24399230ca} 
+static ASTNode\+Ptr {\bfseries make\+Number\+Node} (double value)
+\item 
+\Hypertarget{class_a_s_t_a2983be86c994c3c554064f10ee272bbb}\label{class_a_s_t_a2983be86c994c3c554064f10ee272bbb} 
+static ASTNode\+Ptr {\bfseries make\+Binary\+Operation\+Node} (TOKEN\+::\+OPERATORS op, ASTNode\+Ptr left, ASTNode\+Ptr right)
+\item 
+\Hypertarget{class_a_s_t_ac540c38d1aa6bff8ba5dd20e12c75e54}\label{class_a_s_t_ac540c38d1aa6bff8ba5dd20e12c75e54} 
+static ASTNode\+Ptr {\bfseries make\+Unary\+Operation\+Node} (TOKEN\+::\+OPERATORS op, ASTNode\+Ptr operand)
+\item 
+\Hypertarget{class_a_s_t_a2fc21d4ed1b2853857d8d513a30e26e2}\label{class_a_s_t_a2fc21d4ed1b2853857d8d513a30e26e2} 
+static ASTNode\+Ptr {\bfseries make\+String\+Node} (const std\+::string \&value)
+\item 
+\Hypertarget{class_a_s_t_aad7a5d96e3c46b3e7c3e5aed80551eb0}\label{class_a_s_t_aad7a5d96e3c46b3e7c3e5aed80551eb0} 
+static ASTNode\+Ptr {\bfseries make\+Empty\+Node} ()
+\item 
+\Hypertarget{class_a_s_t_a908f6bffd4c882a1e702e158e2a3ec3c}\label{class_a_s_t_a908f6bffd4c882a1e702e158e2a3ec3c} 
+static ASTNode\+Ptr {\bfseries make\+Sequence\+Node} (ASTNode\+Ptr left, ASTNode\+Ptr right)
+\item 
+\Hypertarget{class_a_s_t_a6c7c0f3c57a6e75824f11d649c93f14c}\label{class_a_s_t_a6c7c0f3c57a6e75824f11d649c93f14c} 
+static ASTNode\+Ptr {\bfseries make\+Variable\+Node} (const std\+::string \&name, ASTNode\+Ptr value)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_a_s_t_aad277cfa61837e3795fde83e31616a5a}\label{class_a_s_t_aad277cfa61837e3795fde83e31616a5a} 
+Type {\bfseries type}
+\item 
+\Hypertarget{class_a_s_t_a1b66391497bdbe5b4fb7bac39453de31}\label{class_a_s_t_a1b66391497bdbe5b4fb7bac39453de31} 
+double {\bfseries value}
+\item 
+\Hypertarget{class_a_s_t_a4e42a91a049efc1bfa1a174100591b44}\label{class_a_s_t_a4e42a91a049efc1bfa1a174100591b44} 
+std\+::string {\bfseries string\+Value}
+\item 
+\Hypertarget{class_a_s_t_a9280d35ed4716eed33fde52fc6169840}\label{class_a_s_t_a9280d35ed4716eed33fde52fc6169840} 
+TOKEN\+::\+OPERATORS {\bfseries op}
+\item 
+\Hypertarget{class_a_s_t_ac3948a9c97ee1afdf5b9bfef2290a0a1}\label{class_a_s_t_ac3948a9c97ee1afdf5b9bfef2290a0a1} 
+ASTNode\+Ptr {\bfseries left}
+\item 
+\Hypertarget{class_a_s_t_aaa0d05eabd9a6b06cde08fa126f32da0}\label{class_a_s_t_aaa0d05eabd9a6b06cde08fa126f32da0} 
+ASTNode\+Ptr {\bfseries right}
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{_a_s_t_8h}{AST.\+h}}\end{DoxyCompactItemize}

@@ -1,7 +1,13 @@
 #include "lexer.h"
 #include "token.h"
 
-
+/**
+ * @brief scans chars and creates tokes
+ * 
+ * This function takes the file input and creates tokens
+ *
+ * @return vector of class TOKEN
+ */
 std::vector<TOKEN> Lexer::read_file() {
     std::string filename = "/Users/alexanderkorzh/Desktop/coding/programming_language/example.eli";
     

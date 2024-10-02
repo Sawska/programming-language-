@@ -1,0 +1,68 @@
+\doxysection{lexer.\+h}
+\hypertarget{lexer_8h_source}{}\label{lexer_8h_source}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#ifndef\ Lexer\_H}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#define\ Lexer\_H}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <iostream>}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <fstream>}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ "{}token.h"{}}}
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ <unordered\_set>}}
+\DoxyCodeLine{00011\ \textcolor{preprocessor}{\#include\ <map>}}
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#include\ "{}variable.h"{}}}
+\DoxyCodeLine{00013\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{_symbol_table_8h}{SymbolTable.h}}"{}}}
+\DoxyCodeLine{00014\ }
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00023\ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_lexer}{Lexer}}\ \{}
+\DoxyCodeLine{00024\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00025\ \ \ \ \ \mbox{\hyperlink{class_lexer}{Lexer}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00026\ \ \ \ \ \mbox{\hyperlink{class_lexer}{Lexer}}(\mbox{\hyperlink{class_lexer}{Lexer}}\&\&)\ =\ \textcolor{keywordflow}{default};\ \ }
+\DoxyCodeLine{00027\ \ \ \ \ \mbox{\hyperlink{class_lexer}{Lexer}}\&\ operator=(\mbox{\hyperlink{class_lexer}{Lexer}}\&\&)\ =\ \textcolor{keywordflow}{default};\ }
+\DoxyCodeLine{00028\ \ \ \ \ std::vector<TOKEN>\ read\_file();}
+\DoxyCodeLine{00029\ \ \ \ \ \mbox{\hyperlink{class_symbol_table}{SymbolTable}}\ table;}
+\DoxyCodeLine{00030\ \ \ \ \ \mbox{\hyperlink{class_symbol_table}{SymbolTable}}\ function\_table;}
+\DoxyCodeLine{00031\ \ \ \ \ \mbox{\hyperlink{class_symbol_table}{SymbolTable}}\ class\_table;}
+\DoxyCodeLine{00032\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00033\ \ \ \ \ \textcolor{keywordtype}{void}\ processOperator(\textcolor{keywordtype}{char}\ c,\ std::ifstream\ \&fileContent,\ std::vector<TOKEN>\ \&result);}
+\DoxyCodeLine{00034\ \ \ \ \ \textcolor{keywordtype}{bool}\ check\_if\_number(\textcolor{keywordtype}{char}\ c);}
+\DoxyCodeLine{00035\ \ \ \ \ \textcolor{keywordtype}{bool}\ check\_if\_operator(\textcolor{keywordtype}{char}\ c);}
+\DoxyCodeLine{00036\ \ \ \ \ \textcolor{keywordtype}{bool}\ check\_if\_char(\textcolor{keywordtype}{char}\ c);}
+\DoxyCodeLine{00037\ \ \ \ \ \textcolor{keywordtype}{void}\ processChar(\textcolor{keywordtype}{char}\ c,std::ifstream\ \&fileContent,\ std::vector<TOKEN>\ \&result);}
+\DoxyCodeLine{00038\ \ \ \ \ \textcolor{keywordtype}{void}\ processVariable(std::ifstream\ \&fileContent,\ std::vector<TOKEN>\ \&result);}
+\DoxyCodeLine{00039\ \ \ \ \ \textcolor{keywordtype}{void}\ processString(\textcolor{keywordtype}{char}\ c,std::ifstream\ \&fileContent,\ std::vector<TOKEN>\ \&result);}
+\DoxyCodeLine{00040\ \ \ \ \ \textcolor{keywordtype}{void}\ processAssignment(std::ifstream\ \&fileContent,\ std::vector<TOKEN>\ \&result);}
+\DoxyCodeLine{00041\ \ \ \ \ std::unordered\_set\ <std::string>\ private\_words\ \{\ \textcolor{stringliteral}{"{}function"{}}\ \textcolor{stringliteral}{"{}let"{}}\ \textcolor{stringliteral}{"{}for"{}}\ \textcolor{stringliteral}{"{}while"{}}\ \textcolor{stringliteral}{"{}if"{}}\ \textcolor{stringliteral}{"{}else"{}}\ \textcolor{stringliteral}{"{}else\ if"{}}\ \textcolor{stringliteral}{"{}for"{}},\ \textcolor{stringliteral}{"{}class"{}},\textcolor{stringliteral}{"{}break"{}}\ \textcolor{stringliteral}{"{}continue"{}},\ \textcolor{stringliteral}{"{}return"{}}\};}
+\DoxyCodeLine{00042\ \};}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ \textcolor{keyword}{enum\ class}\ LexerState\ \{}
+\DoxyCodeLine{00045\ \ \ \ \ Start,}
+\DoxyCodeLine{00046\ \ \ \ \ Variable,}
+\DoxyCodeLine{00047\ \ \ \ \ While,}
+\DoxyCodeLine{00048\ \ \ \ \ IfStatment,}
+\DoxyCodeLine{00049\ \ \ \ \ elseStatment,}
+\DoxyCodeLine{00050\ \ \ \ \ VariableName,}
+\DoxyCodeLine{00051\ \ \ \ \ LetKeywoard,}
+\DoxyCodeLine{00052\ \ \ \ \ functionState,}
+\DoxyCodeLine{00053\ \ \ \ \ classState,}
+\DoxyCodeLine{00054\ \ \ \ \ forLoop,}
+\DoxyCodeLine{00055\ \ \ \ \ Assignment,}
+\DoxyCodeLine{00056\ \ \ \ \ Error,}
+\DoxyCodeLine{00057\ \ \ \ \ Break,}
+\DoxyCodeLine{00058\ \ \ \ \ Continue,}
+\DoxyCodeLine{00059\ \ \ \ \ Return,}
+\DoxyCodeLine{00060\ \ \ \ \ LetKeyword,}
+\DoxyCodeLine{00061\ \ \ \ \ ClassState,}
+\DoxyCodeLine{00062\ \ \ \ \ FunctionState,}
+\DoxyCodeLine{00063\ \ \ \ \ ElseStatement,}
+\DoxyCodeLine{00064\ \ \ \ \ IfStatement,}
+\DoxyCodeLine{00065\ \ \ \ \ ForLoop,}
+\DoxyCodeLine{00066\ \ \ \ \ FunctionName,}
+\DoxyCodeLine{00067\ \};}
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00070\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ Lexer\_H}}
+
+\end{DoxyCode}

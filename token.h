@@ -3,7 +3,13 @@
 #define TOKEN_H 
 #include  <string>
 
-
+/**
+ * @file token.h
+ * @brief Header file for the Token class.
+ * 
+ * This file contains the definition of the Token class,
+ * which is used in parser and lexer
+ */
 struct TOKEN
 {
 
