@@ -29,6 +29,7 @@
 #include "ClassAccessNode.h"
 #include "ObjectNode.h"
 #include "ObjectAccessNode.h"
+#include "SuperExpr.h"
 /**
  * @file parser.h
  * @brief Header file for the parser class.
@@ -87,6 +88,7 @@ public:
     ASTNodePtr parseMethodOrConstructor();
     ASTNodePtr parseClassAccsess();
     ASTNodePtr parseObjectInstance();
+    ASTNodePtr parseSuperExpression(ASTNodePtr &currentClassNode);
 
 
 private:

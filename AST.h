@@ -44,7 +44,8 @@ public:
         Class,
         ClassAccess,
         Object,
-        ObjectAccess
+        ObjectAccess,
+        Super,
     };
 
     Type type;

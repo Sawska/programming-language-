@@ -106,6 +106,11 @@ ASTResult Compiler::evaluateAST(const ASTNodePtr& node) {
     symbolTableStack.pop();
     return VoidType{};
 }
+    case AST::Type::Super: {
+        auto superExpr = static_cast<Super_Expr*>(node.get());
+        auto classNode = static_cast<ClassNode*>(superExpr->baseClass.get());
+        return evaluateAST(classNode->getMethod(superExpr->method));
+    }
 
     case AST::Type::ObjectAccess: {
         auto objectAccessNode = static_cast<ObjectAccessNode*>(node.get());

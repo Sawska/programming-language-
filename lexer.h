@@ -38,7 +38,7 @@ class Lexer {
     void processVariable(std::ifstream &fileContent, std::vector<TOKEN> &result);
     void processString(char c,std::ifstream &fileContent, std::vector<TOKEN> &result);
     void processAssignment(std::ifstream &fileContent, std::vector<TOKEN> &result);
-    std::unordered_set <std::string> private_words { "function" "let" "for" "while" "if" "else" "else if" "for", "class","break" "continue", "return"};
+    std::unordered_set <std::string> private_words { "function" "let" "for" "while" "if" "else" "else if" "for", "class","break" "continue", "return","super"};
 };
 
 enum class LexerState {

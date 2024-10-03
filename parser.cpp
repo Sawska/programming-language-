@@ -831,7 +831,11 @@ ASTNodePtr Parser::parseClass() {
         if (tokens[index].variableName == className && tokens[index + 1].concept == TOKEN::OPEN_CIRCLE_BRACKETS) {
 
             constructor = parseMethodOrConstructor();  
-        } else {
+        } else if(tokens[index].concept == TOKEN::TOKEN_CONCEPTS::SUPER)
+        {
+            return parseSuperExpression(parentClass);
+        }
+        else {
             parseMethodAndProperty(methods, attributes);
         }
         if(tokens[index].concept == TOKEN::TOKEN_CONCEPTS::CLOSE_BRACKETS) {
@@ -853,6 +857,27 @@ ASTNodePtr Parser::parseClass() {
     classTableStack.top()->setVariableValue(className,res->clone());
     return res;
 }
+
+ASTNodePtr Parser::parseSuperExpression(ASTNodePtr &currentClassNode) {
+    
+    index++;
+    
+    if (tokens[index].concept != TOKEN::TOKEN_CONCEPTS::ACSESS) {
+        throw std::runtime_error("Expected '.' after 'super'");
+    }
+    
+    index++;
+    
+    if (tokens[index].concept != TOKEN::TOKEN_CONCEPTS::VARIABLE_NAME) {
+        throw std::runtime_error("Expected method name after 'super.'");
+    }
+    
+    std::string methodName = tokens[index].variableName;
+    index++; 
+    
+    return std::make_unique<Super_Expr>(currentClassNode, methodName);  
+}
+
 
 
 ASTNodePtr Parser::findClassInSymbolTableStack(const std::string& className, SymbolTable& currentTable) {

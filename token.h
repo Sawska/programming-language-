@@ -80,7 +80,8 @@ struct TOKEN
         TRUE,
         FALSE,
         EXTENDS,
-        ACSESS
+        ACSESS,
+        SUPER
     };
 
 

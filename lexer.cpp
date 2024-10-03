@@ -412,7 +412,11 @@ else if (buffer == "else") {
             push_operator_token(TOKEN::OPERATORS::NEWLINE_OPERATOR);
         } 
         return;
-    } else {
+    } else if(buffer == "super")  {
+        TOKEN tok;
+        push_concept_token(TOKEN::TOKEN_CONCEPTS::SUPER);
+    }
+    else {
         state = LexerState::VariableName;
     }
 
